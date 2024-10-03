@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3 uid="uid://bkkj10q3pbskq"]
+
+[ext_resource type="PackedScene" uid="uid://b0ypyg6yubc0c" path="res://Lidar/ScanCloud.tscn" id="1_t64ly"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wva2x"]
+albedo_color = Color(0.976471, 0.580392, 0, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1pcxe"]
+albedo_color = Color(0.6, 1, 1, 1)
+
+[node name="Lidar" type="Node3D"]
+
+[node name="lidar" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00168443, -0.00627339, -0.00314844)
+size = Vector3(0.05, 5, 0.05)
+material = SubResource("StandardMaterial3D_wva2x")
+
+[node name="scanCloud" parent="lidar" instance=ExtResource("1_t64ly")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.002)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="lidar/scanCloud"]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.1, 0.214832, 0, -0.002)
+material = SubResource("StandardMaterial3D_1pcxe")
+
+[node name="Mapa" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+
+[node name="pos_obj" type="CSGBox3D" parent="."]
+size = Vector3(0.1, 0.5, 0.1)

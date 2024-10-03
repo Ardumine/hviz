@@ -1,0 +1,57 @@
+[gd_scene load_steps=6 format=3 uid="uid://bkqevw2coca08"]
+
+[ext_resource type="Script" path="res://ScriptsEngine/Camera.cs" id="1_6u545"]
+[ext_resource type="PackedScene" uid="uid://bkkj10q3pbskq" path="res://Lidar/Lidar.tscn" id="2_l2ofy"]
+[ext_resource type="Script" path="res://Lidar/Lidar.cs" id="3_jewwg"]
+[ext_resource type="Script" path="res://ScriptsEngine/TextBoxFps.cs" id="4_eq7xr"]
+
+[sub_resource type="SystemFont" id="SystemFont_xg6qs"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+
+[node name="Lidar" parent="." instance=ExtResource("2_l2ofy")]
+script = ExtResource("3_jewwg")
+
+[node name="LogTextBox" type="RichTextLabel" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_right = -3.0
+offset_bottom = -2.0
+theme_override_colors/font_shadow_color = Color(0.220242, 0.122022, 1, 1)
+theme_override_fonts/normal_font = SubResource("SystemFont_xg6qs")
+theme_override_font_sizes/normal_font_size = 0
+text = "____LOG____
+____LOG____
+____LOG____
+____LOG____
+____LOG____
+____LOG____
+____LOG____
+____LOG____
+____LOG____
+____LOG____
+____LOG____
+____LOG____
+____LOG____"
+scroll_following = true
+shortcut_keys_enabled = false
+
+[node name="Camera" type="Camera3D" parent="."]
+transform = Transform3D(1.19249e-08, 1, 4.37114e-08, 0, -4.37114e-08, 1, 1, -1.19249e-08, -5.21253e-16, 0, 2, 0)
+script = ExtResource("1_6u545")
+
+[node name="TextBoxFPS" type="RichTextLabel" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -75.0
+offset_bottom = 24.0
+grow_horizontal = 0
+text = "FPS:44"
+scroll_active = false
+script = ExtResource("4_eq7xr")

@@ -1,0 +1,15 @@
+Im writing a program to make a car have self driving.
+The problem is that sometimes there are emergency where the car must stop.
+This is my current program for the self driving:
+
+bool Emergency = false; //Is activated externaly
+
+while(!Done && !Emergency){ //While its not done driving or its is a emergency
+    //Internal code. May include for loops, foreach, etc...
+}
+if(Emergency){
+    Motors.Stop(); //Make the car stop.
+    log.WriteInfo("Car stoped by emergency!");
+}
+
+This works, but if I have for loops inside the main loop the emergency check will not run. Yes, this can be fixed by adding  "|| Emergency", however I want to look an alternative where I can instantly make the while loop stop. Can you help me? This is C#.

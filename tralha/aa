@@ -1,0 +1,9 @@
+Hi! I have this list in C# of points. The points are a path from an starting point(the current location of the robot) to an ending point. I need to make an robot follow all the points to the last one.
+Here are some functions that may be useful:
+
+List<Point> points = new List<Point>();//This is the output of an A Star algoritgm. The first point is always the current position of the robot. 
+Vector3 location = GetLocation();//This gets the current location and direction. X=X of the robot, Y=Y of the robot and Z=Direction of robot(in radians).
+
+void SpeedMotor(double motor1, double motor2){//Sets the speed of each motor on the robot. From -100 to 100.
+    //Internal code
+}
