@@ -27,6 +27,7 @@ class SistemaFSD
         var tratamento = FazerTratamentoPontos(SaidaPathFinder);
         saida.PontosCaminho = OpVec.PointSLAMParaVector2(tratamento);
 
+        saida.PontosCaminho.Add(posObj);
         return saida;
     }
 
@@ -67,7 +68,7 @@ class SistemaFSD
         var worldGrid = new AStar.WorldGrid(TamMapa, TamMapa);
         Parallel.For(0, DadosMapa.Length, (i) =>
         {
-            worldGrid._grid[i] = (short)(DadosMapa[i] / 3);//Preciso de div por 3 para ou sn n faz caminho
+            worldGrid._grid[i] = (short)(255 - DadosMapa[i] );//Preciso de div por 3 para ou sn n faz caminho  / 3
         });
 
         var pathfinderOptions = new AStar.Options.PathFinderOptions
@@ -75,7 +76,7 @@ class SistemaFSD
             SearchLimit = TamMapa * TamMapa / 2,
             UseDiagonals = true,
             //PunishChangeDirection = false,
-            //HeuristicFormula = AStar.Heuristics.HeuristicFormula.Euclidean,
+            HeuristicFormula = AStar.Heuristics.HeuristicFormula.EuclideanNoSQR,
             Weighting = AStar.Options.Weighting.Positive
         };
         var pathfinder = new AStar.PathFinder(worldGrid, pathfinderOptions);
@@ -111,7 +112,7 @@ class SistemaFSD
 
             double x = i;
             double y = pontoProx.X;
-            if (aX * x + bX != y)
+            if ((aX * x + bX) != y)
             {
                 pontosSaida.Add(pontoCurr);
                 aX = (pontoCurr.X - pontoProx.X) / (x - (x + 1.0));//y por x

@@ -40,9 +40,6 @@ public class SistemaLidar
         wsLidar = new WebsocketClient(new Uri("ws://" + IP + ":8000/wslidar"));
         wsPos = new WebsocketClient(new Uri("ws://" + IP + ":8000/wspos"));
 
-        //Directory.CreateDirectory("daddos");
-
-        //  int i = 0;
         wsLidar.MessageReceived.Subscribe((msg) =>
         {
             var dados_recs = JsonConvert.DeserializeObject<List<Ray>>(msg.Text);

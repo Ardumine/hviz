@@ -5,7 +5,7 @@ namespace AStar
     /// <summary>
     /// A world grid consisting of integers where a closed cell is represented by 0
     /// </summary>
-    public class WorldGrid : Grid<short>//float 4 bytes[32 bits]; short 2 bytes[16 bits];
+    public class WorldGrid : Grid<short>//float 4 bits short 2 bytes[16 bits];
     {
         /// <summary>
         /// Creates a new world with the given dimensions initialised to closed
