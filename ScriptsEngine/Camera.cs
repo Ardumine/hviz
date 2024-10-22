@@ -1,104 +1,70 @@
 using System;
 using Godot;
 
-public partial class Camera
- : Camera3D
+public partial class Camera : Camera3D
 {
-	private float _velocity;
+    Node3D Pivot { get; set; }
+    Vector3 Velocity = Vector3.Zero;
+    public float ACCELERATION = 0.7f;
+    public float MOUSE_SENSITIVITY = 0.03f;
 
-	[Export(PropertyHint.Range, "0f,100f,0.01f")]
-	public float BoostSpeedMultiplier = 3.0f;
+    public float TargetSpeed = 0.1f;
 
-	[Export(PropertyHint.Range, "0f,1000f,0.01f")]
-	public float DefaultVelocity = 2f;
+    public void Setup()
+    {
+        Pivot = new();
+        CallDeferred(MethodName.AddSibling, Pivot);
 
-	[Export(PropertyHint.TypeString, "Maximum speed of camera movement.")]
-	public float MaxSpeed = 1000f;
+        //AddSibling(Pivot);
 
-	[Export(PropertyHint.TypeString, "Minimum speed of camera movement.")]
-	public float MinSpeed = 0.2f;
+        Pivot.Position = Position;
+        Pivot.Rotation = Rotation;
+        Pivot.Name = "FreecamPivot";
+        //Reparent(Pivot);
+        CallDeferred(MethodName.Reparent, Pivot);
 
-	[Export(PropertyHint.Range, "0f,10f,0.01f")]
-	public float Sensitivity = 3f;
-
-	[Export(PropertyHint.Range, "0f,10f,0.001f")]
-	public float SpeedScale = 1.17f;
+        Position = new Vector3(0, 0, 0);
+        Rotation = new Vector3(0, 0, 0);
 
 
-	public override void _Ready()
-	{
-		base._Ready();
-		_velocity = DefaultVelocity;
+    }
+    public override void _Ready()
+    {
+        Setup();
+        //Input.MouseMode = Input.MouseModeEnum.Captured;
+    }
 
-		GD.Print("INI sis cam");
-	}
-	public override void _Input(InputEvent @event)
-	{
-		if (!Current)
-			return;
+    public override void _Process(double delta)
+    {
 
-		//base._Input(@event);
+        var dir = Vector3.Zero;
 
-		if (Input.MouseMode == Input.MouseModeEnum.Captured)
-		{
-			if (@event is InputEventMouseMotion mouseMotionEvent)
-			{
+        dir.X += Input.GetActionStrength("BaixoMover") - Input.GetActionStrength("CimaMover");
+        dir.Z += Input.GetActionStrength("EsquerdaMover") - Input.GetActionStrength("DireitaMover");
 
-				Vector3 tempRot = Rotation;
-				tempRot.Y -= mouseMotionEvent.Relative.X / 1000 * Sensitivity;
-				tempRot.X -= mouseMotionEvent.Relative.Y / 1000 * Sensitivity;
-				tempRot.X = Mathf.Clamp(tempRot.X, Mathf.Pi / -2, Mathf.Pi / 2);
-				Rotation = tempRot;
-			}
-		}
+        dir = dir.Normalized();
+        dir = dir.Rotated(Vector3.Up, Pivot.Rotation.Y);
 
-		if (@event is InputEventMouseButton mouseButtonEvent)
-		{
-			if (mouseButtonEvent.Pressed && mouseButtonEvent.ButtonIndex == MouseButton.Right)
-			{
+        Velocity = Meth.Lerp(Vector3.Zero, dir * TargetSpeed, ACCELERATION);
+        Pivot.Position += Velocity;
 
-				/*var from = ProjectRayOrigin(mouseButtonEvent.Position);
-				var to = from + ProjectRayNormal(mouseButtonEvent.Position) * 10000;
-				Position = to;
-				GD.Print(to);*/
-			}
 
-			switch (mouseButtonEvent.ButtonIndex)
-			{
-				case MouseButton.Right:
-					Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Captured ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Captured;
-					break;
-					
-				case MouseButton.WheelUp:
-					_velocity = Mathf.Clamp(_velocity * SpeedScale, MinSpeed, MaxSpeed);
-					break;
-				case MouseButton.WheelDown:
-					_velocity = Mathf.Clamp(_velocity / SpeedScale, MinSpeed, MaxSpeed);
-					break;
-			}
-		}
-	}
 
-	public override void _Process(double delta)
-	{
-		if (!Current)
-			return;
-		var direction = new Vector3(
-				Convert.ToSingle(Input.IsKeyPressed(Key.D)) - Convert.ToSingle(Input.IsKeyPressed(Key.A)),
-				Convert.ToSingle(Input.IsKeyPressed(Key.Space)) - Convert.ToSingle(Input.IsKeyPressed(Key.Shift)),
-				Convert.ToSingle(Input.IsKeyPressed(Key.S)) - Convert.ToSingle(Input.IsKeyPressed(Key.W)))
-		.Normalized();
 
-		if (Input.IsKeyPressed(Key.Ctrl))
-		{
-			Translate(direction * (float)(_velocity * delta * BoostSpeedMultiplier));
-			//Position = direction * (float)(_velocity * delta * BoostSpeedMultiplier)+ Position;
-		}
-		else
-		{
-			Translate(direction * (float)(_velocity * delta));
-			//Position = direction * (float)(_velocity * delta);
-			//Position = direction * (float)(_velocity * delta) + Position;
-		}
-	}
+        //Parte rodar
+        var XJoyStick = Input.GetActionStrength("DireitaCamera") - Input.GetActionStrength("EsquerdaCamera");
+        var YJoyStick = Input.GetActionStrength("BaixoCamera") - Input.GetActionStrength("CimaCamera");
+
+        Pivot.RotateY(-XJoyStick * MOUSE_SENSITIVITY);
+        RotateY(-YJoyStick * MOUSE_SENSITIVITY);
+        Rotation = new Vector3((float)Math.Clamp(Rotation.X, -Math.PI/2, Math.PI/2), Rotation.Y, Rotation.Z);
+
+
+    }
+    public override void _Input(InputEvent @event)
+    {
+        base._Input(@event);
+       
+    }
+
 }

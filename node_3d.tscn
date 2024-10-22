@@ -1,8 +1,8 @@
 [gd_scene load_steps=6 format=3 uid="uid://bkqevw2coca08"]
 
-[ext_resource type="Script" path="res://ScriptsEngine/Camera.cs" id="1_6u545"]
 [ext_resource type="PackedScene" uid="uid://bkkj10q3pbskq" path="res://Lidar/Lidar.tscn" id="2_l2ofy"]
 [ext_resource type="Script" path="res://Lidar/Lidar.cs" id="3_jewwg"]
+[ext_resource type="Script" path="res://ScriptsEngine/Camera.cs" id="3_vq8cm"]
 [ext_resource type="Script" path="res://ScriptsEngine/TextBoxFps.cs" id="4_eq7xr"]
 
 [sub_resource type="SystemFont" id="SystemFont_xg6qs"]
@@ -43,7 +43,7 @@ shortcut_keys_enabled = false
 
 [node name="Camera" type="Camera3D" parent="."]
 transform = Transform3D(1.19249e-08, 1, 4.37114e-08, 0, -4.37114e-08, 1, 1, -1.19249e-08, -5.21253e-16, 0, 2, 0)
-script = ExtResource("1_6u545")
+script = ExtResource("3_vq8cm")
 
 [node name="TextBoxFPS" type="RichTextLabel" parent="."]
 anchors_preset = 1

@@ -76,7 +76,23 @@ class Meth
             return desiredSpeed;
         }
     }
-
+    public static Godot.Vector2 Lerp(Godot.Vector2 First, Godot.Vector2 Second, float Amount)
+    {
+        float retX = Lerp(First.X, Second.X, Amount);
+        float retY = Lerp(First.Y, Second.Y, Amount);
+        return new Godot.Vector2(retX, retY);
+    }
+    public static Godot.Vector3 Lerp(Godot.Vector3 First, Godot.Vector3 Second, float Amount)
+    {
+        float retX = Lerp(First.X, Second.X, Amount);
+        float retY = Lerp(First.Y, Second.Y, Amount);
+        float retZ = Lerp(First.Z, Second.Z, Amount);
+        return new Godot.Vector3(retX, retY, retZ);
+    }
+    public static float Lerp(float First, float Second, float Amount)
+    {
+        return First * (1 - Amount) + Second *  Amount;
+    }
 
 
 }

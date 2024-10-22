@@ -12,7 +12,7 @@ public partial class Lidar : Node3D
 	bool Emerg = false;
 	Vector2 posObj;
 
-	string IP = "192.168.137.5";
+	string IP = "192.168.137.1";
 	ScanCloud scanCloud;
 
 	CsgBox3D lidar;
@@ -142,7 +142,7 @@ public partial class Lidar : Node3D
 		{
 
 			//angleDifference = Meth.ObterDifPos(sisLidar.PosCurr, Meth.Rad4Deg(sisLidar.AngCurr), targetPoint);//Meth.calcDifBetweenAngles(Meth.Rad4Deg(sisLidar.AngCurr), Meth.Rad4Deg(angleToTarget));
-			
+
 			//Take a look to this later.
 			angleDifference = -Meth.ObterDifPos(targetPoint, Meth.Rad4Deg(sisLidar.AngCurr), sisLidar.PosCurr);//Meth.calcDifBetweenAngles(Meth.Rad4Deg(sisLidar.AngCurr), Meth.Rad4Deg(angleToTarget));
 
@@ -270,6 +270,9 @@ public partial class Lidar : Node3D
 			scanCloud.Rotation = new Vector3(scanCloud.Rotation.X, -sisLidar.AngCurr * 2.0f, scanCloud.Rotation.Z);//tem de ser *2 pois ao virar o child "lidar" tmb movemos a cloud. a outra é para que n se mexa e fique no seu lugar
 
 		}
+		if(!Camera.ModoCamera){
+			sisMotores.MandarSteer((int)((Input.GetActionStrength("DireitaMover") - Input.GetActionStrength("EsquerdaMover")) * 50), (int)((Input.GetActionStrength("CimaMover") - Input.GetActionStrength("BaixoMover")) * 100));
+		}
 		Contador_update++;
 	}
 
@@ -292,7 +295,15 @@ public partial class Lidar : Node3D
 
 	public override void _Input(InputEvent @event)
 	{
-		if (@event is InputEventKey keyEvent && keyEvent.Pressed)
+
+	 if (Input.GetActionStrength("MudarModoMover") ==1)
+			{
+				Camera.ModoCamera = !Camera.ModoCamera;
+	
+				Log("Modo usar camera: " + Camera.ModoCamera);
+			}
+	
+			if (@event is InputEventKey keyEvent && keyEvent.Pressed)
 		{
 			//Definir img
 			if (keyEvent.Keycode == Key.J)
@@ -425,7 +436,8 @@ public partial class Lidar : Node3D
 				Log($"Ang 0 dist: {ang0.Radius} {ang0.Angle}");
 			}
 
-			/*if (keyEvent.Keycode == Key.C)
+			//Trocar modo Comando/Controlar robo.
+					/*if (keyEvent.Keycode == Key.C)
 			{
 
 				//new Thread(() =>
