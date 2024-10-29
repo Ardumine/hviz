@@ -42,14 +42,21 @@ public class SistemaLidar
 
         wsLidar.MessageReceived.Subscribe((msg) =>
         {
-            var dados_recs = JsonConvert.DeserializeObject<List<Ray>>(msg.Text);
-            for (int i = 0; i < dados_recs.Count; i++)
-            {
-                dados_recs[i] = new(dados_recs[i].Angle, dados_recs[i].Radius / 100.0f);
-            }
 
-            OnDadosRecebidos?.Invoke(dados_recs);
-            Thread.Sleep(1500);
+            try
+            {
+                var dados_recs = JsonConvert.DeserializeObject<List<Ray>>(msg.Text);
+                for (int i = 0; i < dados_recs.Count; i++)
+                {
+                    dados_recs[i] = new(dados_recs[i].Angle, dados_recs[i].Radius / 100.0f);
+                }
+                OnDadosRecebidos?.Invoke(dados_recs);
+            }
+            catch
+            {
+
+            }
+            Thread.Sleep(1400);
             wsLidar.Send("lu");
 
         });
@@ -63,12 +70,13 @@ public class SistemaLidar
 
             Thread.Sleep(100);
             wsPos.Send("lu");
+            Godot.GD.Print("Dados Recebidos!");
 
         });
         wsLidar.Start();
         wsPos.Start();
 
-        Thread.Sleep(800);
+        Thread.Sleep(1500);
         wsLidar.Send("lu");
         wsPos.Send("lu");
 

@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 class Meth
 {
 
@@ -91,7 +92,16 @@ class Meth
     }
     public static float Lerp(float First, float Second, float Amount)
     {
-        return First * (1 - Amount) + Second *  Amount;
+        return First * (1 - Amount) + Second * Amount;
+    }
+
+    public static double ObterDist(Vector2 v1, Vector2 v2)
+    {
+        return Math.Sqrt(Math.Pow(v1.X - v2.X, 2) + Math.Pow(v1.Y - v2.Y, 2));
+    }
+    public static double ObterDist(System.Drawing.Point v1, System.Drawing.Point v2)
+    {
+        return Math.Sqrt(Math.Pow(v1.X - v2.X, 2) + Math.Pow(v1.Y - v2.Y, 2));
     }
 
 

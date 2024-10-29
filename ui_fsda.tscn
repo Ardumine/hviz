@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://bdaopxt6w8iw3"]
+
+[node name="UI_FSD" type="Control"]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="GridContainer" type="GridContainer" parent="."]
+layout_mode = 0
+offset_right = 337.0
+offset_bottom = 111.0
+
+[node name="sliderTeste" type="HSlider" parent="GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 200.0
+step = 0.1
+value = 10.0
+
+[node name="OptionButton" type="OptionButton" parent="GridContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 10

@@ -12,8 +12,12 @@ class SistemaMapa{
 
 
 	static int TamMapa = 1000;
+	/// <summary>
+	/// Mapa. Cada pixel = 1 cm
+	/// </summary>
 	public byte[] Dados_mapa = new byte[TamMapa * TamMapa];
-    public void Iniciar(string IP){
+    public void Iniciar(string IP, int tamMapa){
+		TamMapa = tamMapa;
         new Thread(() =>
 		{
 			while (true)

@@ -1,11 +1,14 @@
-[gd_scene load_steps=6 format=3 uid="uid://bkqevw2coca08"]
+[gd_scene load_steps=8 format=3 uid="uid://bkqevw2coca08"]
 
 [ext_resource type="PackedScene" uid="uid://bkkj10q3pbskq" path="res://Lidar/Lidar.tscn" id="2_l2ofy"]
 [ext_resource type="Script" path="res://Lidar/Lidar.cs" id="3_jewwg"]
 [ext_resource type="Script" path="res://ScriptsEngine/Camera.cs" id="3_vq8cm"]
 [ext_resource type="Script" path="res://ScriptsEngine/TextBoxFps.cs" id="4_eq7xr"]
+[ext_resource type="PackedScene" uid="uid://q84rvibdihng" path="res://UI/UI_FSD.tscn" id="5_ulkbg"]
+[ext_resource type="PackedScene" uid="uid://dl8p62ug2ij3r" path="res://teste.tscn" id="6_plyej"]
 
 [sub_resource type="SystemFont" id="SystemFont_xg6qs"]
+subpixel_positioning = 0
 
 [node name="Node3D" type="Node3D"]
 
@@ -42,7 +45,6 @@ scroll_following = true
 shortcut_keys_enabled = false
 
 [node name="Camera" type="Camera3D" parent="."]
-transform = Transform3D(1.19249e-08, 1, 4.37114e-08, 0, -4.37114e-08, 1, 1, -1.19249e-08, -5.21253e-16, 0, 2, 0)
 script = ExtResource("3_vq8cm")
 
 [node name="TextBoxFPS" type="RichTextLabel" parent="."]
@@ -55,3 +57,21 @@ grow_horizontal = 0
 text = "FPS:44"
 scroll_active = false
 script = ExtResource("4_eq7xr")
+metadata/_edit_use_anchors_ = true
+
+[node name="Control" parent="." instance=ExtResource("6_plyej")]
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 316.0
+offset_top = 284.0
+offset_right = 316.0
+offset_bottom = 284.0
+grow_horizontal = 1
+grow_vertical = 1
+
+[node name="UI_FSD" parent="." instance=ExtResource("5_ulkbg")]
+offset_left = -303.0
+offset_top = -87.0
+offset_right = -3.0
+offset_bottom = 13.0

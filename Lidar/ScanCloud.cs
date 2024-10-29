@@ -112,6 +112,3 @@ public partial class ScanCloud : Node3D
 
 
 }
-
-
-

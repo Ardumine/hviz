@@ -10,6 +10,10 @@ class OpVec
     {
         return new Godot.Vector3(vector.X, 0, vector.Y);
     }
+     public static Godot.Vector3 Vector2pVector3(Vector2 vector, float Z)
+    {
+        return new Godot.Vector3(vector.X, Z, vector.Y);
+    }
     public static Vector2 Vector3pVector2(Godot.Vector3 vector)
     {
         return new Vector2(vector.X, vector.Z);

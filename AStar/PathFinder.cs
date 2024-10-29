@@ -22,7 +22,7 @@ namespace AStar
             _options = pathFinderOptions ?? new PathFinderOptions();
             _heuristic = HeuristicFactory.Create(_options.HeuristicFormula);
         }
-        
+
         ///<inheritdoc/>
         public Point[] FindPath(Point start, Point end)
         {
@@ -30,7 +30,7 @@ namespace AStar
                 .Select(position => new Point(position.Y, position.X))
                 .ToArray();
         }
-        
+
         ///<inheritdoc/>
         public Position[] FindPath(Position start, Position end)
         {
@@ -43,7 +43,7 @@ namespace AStar
             while (graph.HasOpenNodes)
             {
                 var q = graph.GetOpenNodeWithSmallestF();
-                
+
                 if (q.Position == end)
                 {
                     return OrderClosedNodesAsArray(graph, q);
@@ -73,11 +73,11 @@ namespace AStar
                     var newH = _heuristic.Calculate(successor.Position, end);
                     switch (_options.Weighting)
                     {
-                        case Weighting.Positive:
-                            newH -= _world[successor.Position];
-                            break;
                         case Weighting.Negative:
                             newH += _world[successor.Position];
+                            break;
+                        case Weighting.Positive:
+                            newH -= _world[successor.Position];
                             break;
                         case Weighting.None:
                         default:
@@ -89,7 +89,7 @@ namespace AStar
                         g: newG,
                         h: newH,
                         parentNodePosition: q.Position);
-                    
+
                     if (BetterPathToSuccessorFound(updatedSuccessor, successor))
                     {
                         graph.OpenNode(updatedSuccessor);
@@ -108,9 +108,9 @@ namespace AStar
             {
                 return 0;
             }
-            
+
             var gPunishment = Math.Abs(successor.Position.X - end.X) + Math.Abs(successor.Position.Y - end.Y);
-            
+
             var successorIsVerticallyAdjacentToQ = successor.Position.X - q.Position.X != 0;
 
             if (successorIsVerticallyAdjacentToQ)

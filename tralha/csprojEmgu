@@ -1,0 +1,2 @@
+<PackageReference Include="Emgu.CV.runtime.debian-arm64" Version="4.9.0.5494" />
+<PackageReference Include="Emgu.CV.runtime.windows" Version="4.9.0.5494" />

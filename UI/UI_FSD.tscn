@@ -1,0 +1,63 @@
+[gd_scene load_steps=2 format=3 uid="uid://q84rvibdihng"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_upaqc"]
+bg_color = Color(0.996078, 0.627451, 0.521569, 0.176471)
+border_width_left = 2
+border_width_top = 3
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.799134, 0.59056, 0.184703, 1)
+border_blend = true
+
+[node name="UI_FSD" type="Panel"]
+custom_minimum_size = Vector2(300, 100)
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -276.0
+offset_top = -45.0
+offset_right = 24.0
+offset_bottom = 55.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upaqc")
+
+[node name="gd" type="GridContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="peso" type="GridContainer" parent="gd"]
+layout_mode = 2
+size_flags_horizontal = 3
+columns = 2
+
+[node name="Label" type="Label" parent="gd/peso"]
+layout_mode = 2
+text = "Import Peso "
+
+[node name="slider" type="HSlider" parent="gd/peso"]
+layout_mode = 2
+size_flags_horizontal = 3
+step = 0.1
+value = 40.0
+
+[node name="heuristic" type="GridContainer" parent="gd"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 2
+columns = 2
+
+[node name="Label" type="Label" parent="gd/heuristic"]
+layout_mode = 2
+text = " Heuristic"
+
+[node name="optTipoAlgo" type="OptionButton" parent="gd/heuristic"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 10
