@@ -22,13 +22,16 @@ class Meth
 
     public static double Deg4Rad(double degrees)
     {
-        double radians = (Math.PI / 180) * (degrees);
-        return radians;
+        //double radians = (Math.PI / 180) * (degrees);
+        //return radians;
+        return double.DegreesToRadians(degrees);
+
     }
     public static double Rad4Deg(double radians)
     {
-        double degrees = (180 / Math.PI) * radians;
-        return degrees - (int)(degrees / 360) * 360;
+        //double degrees = (180 / Math.PI) * radians;
+        //return degrees - (int)(degrees / 360) * 360;
+        return double.RadiansToDegrees(radians);
     }
 
     /// <summary>
@@ -38,7 +41,7 @@ class Meth
     /// <param name="angSrcRad">Deg</param>
     /// <param name="posObj"></param>
     /// <returns>Angulo de dif em Deg</returns>
-    public static double ObterDifPos(System.Numerics.Vector2 posSrc, double angSrcDeg, System.Numerics.Vector2 posObj)
+    public static double ObterDifAng(System.Numerics.Vector2 posSrc, double angSrcRad, System.Numerics.Vector2 posObj)
     {
         // Calculate the difference vector between target and current positions
         double dx = posObj.X - posSrc.X;
@@ -48,16 +51,33 @@ class Meth
         double targetAngleRadians = Math.Atan2(dy, dx);
 
         // Convert both angles to degrees for easier understanding and calculation
-        double currentAngleDegrees = angSrcDeg;
         double targetAngleDegrees = Rad4Deg(targetAngleRadians);
 
         // Calculate the difference in angle between current orientation and target position
-        double angleDifference = targetAngleDegrees - currentAngleDegrees;
+        double angleDifference = targetAngleDegrees - Meth.Rad4Deg(angSrcRad);
 
         // Normalize the angle difference to be within [-180, 180] degrees
         if (angleDifference > 180) { angleDifference -= 360; }
         else if (angleDifference < -180) { angleDifference += 360; }
         return angleDifference;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="posSrc"></param>
+    /// <param name="posObj"></param>
+    /// <returns>Angulo de dif em rad</returns>
+    public static double ObterDifAngRad(System.Numerics.Vector2 posSrc, System.Numerics.Vector2 posObj)
+    {
+        // Calculate the difference vector between target and current positions
+        double dx = posObj.X - posSrc.X;
+        double dy = posObj.Y - posSrc.Y;
+
+        // Calculate the angle to the target point in radians
+        double targetAngleRadians = Math.Atan2(dy, dx);
+
+        return targetAngleRadians;
     }
 
 

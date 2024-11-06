@@ -42,9 +42,17 @@ class SistemaMotores
 	double maxVel = 100;
 	double maxSteer = 500;
 
+	int ultSteer = -100000;
+	int ultSpeed = -100000;
+
 	public void MandarSteer(int steer, int vel)
 	{
-		SistemaLidar.MandarDadosStrWs($"{steer}, {vel}|");
+		if (ultSpeed != vel || ultSteer != steer)
+		{
+			SistemaLidar.MandarDadosStrWs($"{steer}, {vel}|");
+			ultSteer = steer;
+			ultSpeed = vel;
+		}
 		//porta.Write($"{steer}, {vel}|");
 		//<   porta.Write($"{steer * maxSteer}, {vel * maxVel}|");
 

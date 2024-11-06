@@ -1,0 +1,15 @@
+C:\Users\Davida_dev\OneDrive\Ambiente de Trabalho\hnv\hviz\teste\bin\Debug\net8.0\teste.exe
+C:\Users\Davida_dev\OneDrive\Ambiente de Trabalho\hnv\hviz\teste\bin\Debug\net8.0\teste.deps.json
+C:\Users\Davida_dev\OneDrive\Ambiente de Trabalho\hnv\hviz\teste\bin\Debug\net8.0\teste.runtimeconfig.json
+C:\Users\Davida_dev\OneDrive\Ambiente de Trabalho\hnv\hviz\teste\bin\Debug\net8.0\teste.dll
+C:\Users\Davida_dev\OneDrive\Ambiente de Trabalho\hnv\hviz\teste\bin\Debug\net8.0\teste.pdb
+C:\Users\Davida_dev\OneDrive\Ambiente de Trabalho\hnv\hviz\teste\obj\Debug\net8.0\teste.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Davida_dev\OneDrive\Ambiente de Trabalho\hnv\hviz\teste\obj\Debug\net8.0\teste.AssemblyInfoInputs.cache
+C:\Users\Davida_dev\OneDrive\Ambiente de Trabalho\hnv\hviz\teste\obj\Debug\net8.0\teste.AssemblyInfo.cs
+C:\Users\Davida_dev\OneDrive\Ambiente de Trabalho\hnv\hviz\teste\obj\Debug\net8.0\teste.csproj.CoreCompileInputs.cache
+C:\Users\Davida_dev\OneDrive\Ambiente de Trabalho\hnv\hviz\teste\obj\Debug\net8.0\teste.sourcelink.json
+C:\Users\Davida_dev\OneDrive\Ambiente de Trabalho\hnv\hviz\teste\obj\Debug\net8.0\teste.dll
+C:\Users\Davida_dev\OneDrive\Ambiente de Trabalho\hnv\hviz\teste\obj\Debug\net8.0\refint\teste.dll
+C:\Users\Davida_dev\OneDrive\Ambiente de Trabalho\hnv\hviz\teste\obj\Debug\net8.0\teste.pdb
+C:\Users\Davida_dev\OneDrive\Ambiente de Trabalho\hnv\hviz\teste\obj\Debug\net8.0\teste.genruntimeconfig.cache
+C:\Users\Davida_dev\OneDrive\Ambiente de Trabalho\hnv\hviz\teste\obj\Debug\net8.0\ref\teste.dll

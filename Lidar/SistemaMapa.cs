@@ -1,13 +1,15 @@
 using System;
 using System.Net.Sockets;
 using System.Threading;
+using Emgu.CV;
 using Godot;
 
-class SistemaMapa{
+class SistemaMapa
+{
 
-    
-    public delegate void OnDadosRecebidosEvent(byte[] dados);
-    public event OnDadosRecebidosEvent OnDadosRecebidos;
+
+	public delegate void OnDadosRecebidosEvent(byte[] dados);
+	public event OnDadosRecebidosEvent OnDadosRecebidos;
 
 
 
@@ -16,9 +18,18 @@ class SistemaMapa{
 	/// Mapa. Cada pixel = 1 cm
 	/// </summary>
 	public byte[] Dados_mapa = new byte[TamMapa * TamMapa];
-    public void Iniciar(string IP, int tamMapa){
+
+	public void LoadMapaBMP(string NomeFich)
+	{
+		Mat mat = CvInvoke.Imread(NomeFich, Emgu.CV.CvEnum.ImreadModes.Grayscale);
+		mat.CopyTo(Dados_mapa);
+		OnDadosRecebidos?.Invoke(Dados_mapa);
+
+	}
+	public void Iniciar(string IP, int tamMapa)
+	{
 		TamMapa = tamMapa;
-        new Thread(() =>
+		new Thread(() =>
 		{
 			while (true)
 			{
@@ -43,15 +54,15 @@ class SistemaMapa{
 										 //Log(read);
 						}
 						Dados_mapa = dados;
-                        OnDadosRecebidos?.Invoke(dados);
+						OnDadosRecebidos?.Invoke(dados);
 
 					}
 				}
-				catch(Exception e)
+				catch (Exception e)
 				{
 					GD.PrintErr("erro TCP!" + e.Message);
 				}
 			}
 		}).Start();
-    }
+	}
 }

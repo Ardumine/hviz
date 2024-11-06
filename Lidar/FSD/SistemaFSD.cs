@@ -14,7 +14,7 @@ class SistemaFSD
 	public float Mult = 10.0f;
 	public int IDXSelect = 1;
 	public bool UsarTransforms = true;
-	public ResultadoPrepFSD Fazer(int TamMapa, byte[] DadosMapa, Vector2 posCurr, Vector2 posObj)
+	public ResultadoPrepFSD Fazer(int TamMapa, byte[] DadosMapa, Vector2 posCurr, Vector2 posObj, double angInitRad)
 	{
 		ResultadoPrepFSD saida = new();
 
@@ -32,7 +32,7 @@ class SistemaFSD
 		Godot.GD.Print("Caminho OK!" + SaidaPathFinder.Count);
 
 		//Fazer o tratamento
-		var tratamento = FazerTratamentoPontos(SaidaPathFinder);
+		var tratamento = FazerTratamentoPontos(SaidaPathFinder, OpVec.Vector2pPoint(SistemaLidar.PosJogoParaSLAM(posCurr)), angInitRad);
 		saida.PontosCaminho = OpVec.PointSLAMParaVector2(tratamento);
 		Godot.GD.Print("Tratamento OK!");
 
@@ -51,7 +51,7 @@ class SistemaFSD
 	{
 		//Environment.SetEnvironmentVariable("LD_LIBRARY_PATH", $"{Environment.GetEnvironmentVariable("LD_LIBRARY_PATH")}:/home/test123/testeEMGU/bin/Debug/net8.0/runtimes/linux-arm64/native");
 
-		if(!UsarTransforms) return DadosMapa;
+		if (!UsarTransforms) return DadosMapa;
 		// 1 é livre 0 é fechado
 		var sw = Stopwatch.StartNew();
 		Mat mat = new Mat(TamMapa, TamMapa, DepthType.Cv8U, 1);
@@ -61,10 +61,10 @@ class SistemaFSD
 
 		CvInvoke.Normalize(mat, mat, 0, 255.0, normType: NormType.MinMax, dType: DepthType.Cv8U);
 		CvInvoke.Threshold(mat, mat, 200, 255, ThresholdType.Binary);
-		mat.Save("mapa.png");
+		//mat.Save("mapa.png");
 
 		//Tamanho robo
-		Mat kernel = CvInvoke.GetStructuringElement(ElementShape.Ellipse, new Size(30, 30), new Point(-1, -1));
+		Mat kernel = CvInvoke.GetStructuringElement(ElementShape.Ellipse, new Size(60, 60), new Point(-1, -1));
 		CvInvoke.Erode(mat, mat, kernel, new Point(-1, -1), 1, BorderType.Default, new MCvScalar(0));
 		CvInvoke.DistanceTransform(mat, mat, null, DistType.L2, 3);
 		CvInvoke.Normalize(mat, mat, 0, 255.0, NormType.MinMax, dType: DepthType.Cv8U);
@@ -72,6 +72,8 @@ class SistemaFSD
 		byte[] DadosMapaTransformados = new byte[TamMapa * TamMapa];
 		mat.CopyTo(DadosMapaTransformados);
 		mat.Dispose();
+		Godot.GD.Print("Fim fazer!" + sw.ElapsedMilliseconds);
+
 		return DadosMapaTransformados;//DadosMapaTransformados
 	}
 
@@ -102,7 +104,7 @@ class SistemaFSD
 
 		var pathfinderOptions = new AStar.Options.PathFinderOptions
 		{
-			SearchLimit = TamMapa * TamMapa,
+			SearchLimit = (TamMapa * TamMapa) / 2,
 			UseDiagonals = true, //tut diz false
 			PunishChangeDirection = false, // tut diz true
 			HeuristicFormula = (AStar.Heuristics.HeuristicFormula)IDXSelect, //sqr
@@ -124,7 +126,7 @@ class SistemaFSD
 	/// </summary>
 	/// <param name="pontos"></param>
 	/// <returns></returns>
-	private List<Point> FazerTratamentoPontos(List<Point> pontos)
+	private List<Point> FazerTratamentoPontos2(List<Point> pontos, Point posInit, double angInitRad)
 	{
 		double aX = 0;
 		double bX = 0;
@@ -158,16 +160,106 @@ class SistemaFSD
 			}
 		}
 		//pontosSaida.RemoveAt(0);//Remover o primeiro ponto
+
+		//Parte 2
 		var pontoInicial = pontosSaida[0];
 		var li = new List<Point>(pontosSaida);
-		foreach(var ponto in li){
-			if(Meth.ObterDist(pontoInicial, ponto) < 20){
+
+		for (int i = 0; i < li.Count; i++)
+		{
+			Point ponto = li[i];
+			if (Meth.ObterDist(pontoInicial, ponto) < 20)
+			{
 				pontosSaida.Remove(ponto);
 			}
 		}
+
+
+
 		return pontosSaida;
 	}
+	private List<Point> FazerTratamentoPontos(List<Point> pontos, Point posInit, double angInitRad)
+	{
 
+		var pontoInicial = pontos[0];
+		var li = new List<Point>(pontos);
+
+		//for (int i = 0; i < li.Count; i++)
+		{
+			//Point ponto = li[i];
+			//if (Meth.ObterDist(pontoInicial, ponto) < 20)
+			{
+				//pontos.Remove(ponto);
+			}
+		}
+
+		double ultAng = 0;
+		li.Clear();
+		li.Add(posInit);
+		li = li.Concat(new List<Point>(pontos)).ToList();
+
+		List<Point> saida = new();
+		Point UltAcont = new Point(0, 0);
+
+		for (int i = 0; i < li.Count - 1; i++)
+		{
+
+			Point ponto = li[i];
+			Point pontoProx = li[i + 1];
+
+			Vector2 v1 = OpVec.PointpVector2(UltAcont);
+			Vector2 v2 = OpVec.PointpVector2(pontoProx);
+			var deltaAlpha = ObterDeltaAlpha(v1, v2, ultAng);
+
+
+			//var angDif = Meth.ObterDifAng(SistemaLidar.PosSLAMParaJogo(pontoAnt), ultAng, SistemaLidar.PosSLAMParaJogo(ponto));
+
+
+
+			if (Math.Abs(Meth.Rad4Deg(deltaAlpha)) > 4)
+			{
+				saida.Add(ponto);
+				UltAcont = ponto;
+				ultAng = Meth.ObterDifAngRad(OpVec.PointpVector2(ponto), v2);
+
+			}
+			
+			//if (Math.Abs(Meth.Rad4Deg(deltaAlpha)) > 4)
+			{
+				//saida.Add(ponto);
+				//UltAcont = ponto;
+				//ultAng = Meth.ObterDifAngRad(OpVec.PointpVector2(ponto), v2);
+
+			}
+		}
+
+		pontoInicial = posInit;
+		li.Clear();
+
+		for (int i = 0; i < saida.Count; i++)
+		{
+			Point ponto = saida[i];
+			if (Meth.ObterDist(pontoInicial, ponto) > 30)
+			{
+				li.Add(ponto);
+			}
+		}
+
+		return li;
+	}
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="v1">Onde eu tou</param>
+	/// <param name="v2">Proxima casa</param>
+	/// <param name="rotV1">Minha rot no mundo</param>
+	/// <returns>Delta alpha em rad</returns>
+	double ObterDeltaAlpha(Vector2 v1, Vector2 v2, double rotV1)
+	{
+
+		var alpha = Meth.ObterDifAngRad(v1, v2) - rotV1;
+		return alpha;
+	}
 }
 class ResultadoPrepFSD
 {

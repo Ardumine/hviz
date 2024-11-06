@@ -15,6 +15,7 @@ public partial class Lidar : Node3D
 	string IP = "192.168.137.5";//192.168.137.5 127.0.0.1
 	ScanCloud scanCloud;
 
+	CsgBox3D BoxApontador;
 	CsgBox3D lidar;
 	CsgBox3D posObjCaixa;
 	Camera camera;
@@ -39,6 +40,10 @@ public partial class Lidar : Node3D
 	int idx_seg = 0;
 
 
+	void Criar(){
+
+	}
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -47,11 +52,19 @@ public partial class Lidar : Node3D
 		SpriteMapa = GetNode<Sprite3D>("Mapa");
 		posObjCaixa = GetNode<CsgBox3D>("pos_obj");
 		camera = GetNode<Camera>("../Camera");
+		BoxApontador = GetNode<CsgBox3D>("../BoxApontador");
 		LogTextBox = GetNode<RichTextLabel>("../LogTextBox");
 
 		sliderImportPesoFSD = GetNode<Slider>("../UI_FSD/gd/peso/slider");
 		optTipoAlgo = GetNode<OptionButton>("../UI_FSD/gd/heuristic/optTipoAlgo");
 		Iniciar();
+
+
+		camera.OnClick3D += (pos) =>{
+			var pos2D = OpVec.Vector3pVector2(pos);
+			Log(pos);	
+		};
+
 
 		optTipoAlgo.AddItem("Manhattan");
 		optTipoAlgo.AddItem("MaxDXDY");
@@ -84,6 +97,9 @@ public partial class Lidar : Node3D
 
 		sisMapa = new SistemaMapa();
 		sisMapa.Iniciar(IP, TamMapa);
+		//sisMapa.LoadMapaBMP("mt.bmp");
+		image = ImageTexture.CreateFromImage(Image.CreateFromData(TamMapa, TamMapa, false, Image.Format.L8, sisMapa.Dados_mapa));
+
 		sisMapa.OnDadosRecebidos += (dados) =>
 		{
 			image = ImageTexture.CreateFromImage(Image.CreateFromData(TamMapa, TamMapa, false, Image.Format.L8, dados));
@@ -103,6 +119,39 @@ public partial class Lidar : Node3D
 		//Fase 1 virar para o primeiro ponto
 		for (idx_seg = 0; idx_seg < PontosParaIr.Count; idx_seg++)
 		{
+			var angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, PontosParaIr[idx_seg]);
+
+			double Dist_Prox = Meth.ObterDist(sisLidar.PosCurr, PontosParaIr[idx_seg]);
+
+
+			if (Math.Abs(angleDifference) > 20 && Dist_Prox > 0.10)
+			{
+				//Rodar
+				sisMotores.MandarSteer(0, 0);
+				RodarParaGrau(PontosParaIr[idx_seg], true, 15, 0.2, token);
+				/*new Thread(() =>
+				{
+					sisMotores.MandarSteer(0, 0);
+					Thread.Sleep(100);
+			if (token.IsCancellationRequested || Emerg) return;
+
+					sisMotores.MandarSteer(0, 0);
+					FazerTrace();
+			if (token.IsCancellationRequested || Emerg) return;
+
+					Thread.Sleep(1000);
+					new Thread(() =>
+					{
+					Thread.Sleep(100);
+						SeguirPontos(posesParaObj);
+					}).Start();
+				}).Start();
+				break;
+				*/
+			}
+			if (token.IsCancellationRequested || Emerg) return;
+			///NavegarParaPonto(PontosParaIr[idx_seg], true, 0.2, 0.9, token);
+
 			IrParaPonto(PontosParaIr[idx_seg], true);
 			if (token.IsCancellationRequested || Emerg) return;
 
@@ -126,27 +175,28 @@ public partial class Lidar : Node3D
 
 	void IrParaPonto(Vector2 targetPoint, bool ModoContinuo = false, CancellationToken token = default(CancellationToken))
 	{
-		double angleToTarget = Math.Atan2(targetPoint.Y, targetPoint.X);
+		//double angleToTarget = Math.Atan2(targetPoint.Y, targetPoint.X);
 
-		var dif = Meth.calcDifBetweenAngles(Meth.Rad4Deg(sisLidar.AngCurr), Meth.Rad4Deg(angleToTarget));
+		var angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, targetPoint);
 
-		var currentLocation = sisLidar.PosCurr;
-		double Dist_Prox = Math.Sqrt(Math.Pow(currentLocation.X - targetPoint.X, 2) + Math.Pow(currentLocation.Y - targetPoint.Y, 2));
+		double Dist_Prox = Meth.ObterDist(sisLidar.PosCurr, targetPoint);
 
 		if (ModoContinuo)
 		{
-			if (Math.Abs(dif) > 15 && Dist_Prox > 0.15)
+			if (Math.Abs(angleDifference) > 20 && Dist_Prox > 0.2)
 			{
 				//Rodar
-				RodarParaGrau(targetPoint, true, 30, token);
+				sisMotores.MandarSteer(0, 0);
+				sisMotores.MandarSteer(0, 0);
+				RodarParaGrau(targetPoint, true, 20, 0.2, token);
 			}
 			if (token.IsCancellationRequested || Emerg) return;
-			NavegarParaPonto(targetPoint, true, 0.2, 1.1, token);
+			NavegarParaPonto(targetPoint, true, 0.2, 0.9, token);
 
 		}
 		else
 		{
-			if (Math.Abs(dif) > 10)
+			if (Math.Abs(angleDifference) > 10)
 			{
 				//Rodar
 				RodarParaGrau(targetPoint, token: token);
@@ -158,23 +208,26 @@ public partial class Lidar : Node3D
 
 	}
 
-	void RodarParaGrau(Vector2 targetPoint, bool ModoContinuo = false, int AngMaxDif = 5, CancellationToken token = default(CancellationToken))
+	void RodarParaGrau(Vector2 targetPoint, bool ModoContinuo = false, int AngMaxDif = 5, double ErroDistPox = 0.1, CancellationToken token = default(CancellationToken))
 	{
 
-		double angleDifference = Meth.ObterDifPos(sisLidar.PosCurr, Meth.Rad4Deg(sisLidar.AngCurr), targetPoint);//Meth.calcDifBetweenAngles(Meth.Rad4Deg(sisLidar.AngCurr), Meth.Rad4Deg(angleToTarget));
+		double angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, targetPoint);//Meth.calcDifBetweenAngles(Meth.Rad4Deg(sisLidar.AngCurr), Meth.Rad4Deg(angleToTarget));
+		double Dist_Prox = Meth.ObterDist(sisLidar.PosCurr, targetPoint);
 
-		while (!(angleDifference < AngMaxDif && angleDifference > -AngMaxDif) && !Emerg)
+		while (Math.Abs(angleDifference) > AngMaxDif && !Emerg && Dist_Prox > ErroDistPox)
 		{
 
 			//angleDifference = Meth.ObterDifPos(sisLidar.PosCurr, Meth.Rad4Deg(sisLidar.AngCurr), targetPoint);//Meth.calcDifBetweenAngles(Meth.Rad4Deg(sisLidar.AngCurr), Meth.Rad4Deg(angleToTarget));
 
 			//Take a look to this later.
-			angleDifference = -Meth.ObterDifPos(targetPoint, Meth.Rad4Deg(sisLidar.AngCurr), sisLidar.PosCurr);//Meth.calcDifBetweenAngles(Meth.Rad4Deg(sisLidar.AngCurr), Meth.Rad4Deg(angleToTarget));
+			angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, targetPoint);//Meth.calcDifBetweenAngles(Meth.Rad4Deg(sisLidar.AngCurr), Meth.Rad4Deg(angleToTarget));
 
-			int steer = Meth.SpeedControl((int)(angleDifference / 180.0 * 400.0), 50);
-			Log($"RDif: {angleDifference} SLAC: {sisLidar.AngCurr} SC_S: {steer}");
-			sisMotores.MandarSteer(steer, 60);
+			int steer = Meth.SpeedControl((int)(angleDifference / 180.0 * 1200.0), 130);
+			Log($"RodParaProxPonto DifAng: {angleDifference:F2} LidAngCurr: {sisLidar.AngCurr:F2} MotSteer: {steer:F2}");
+			sisMotores.MandarSteer(steer, 0);
 			if (token.IsCancellationRequested || Emerg) return;
+			Dist_Prox = Meth.ObterDist(sisLidar.PosCurr, targetPoint);
+
 			Thread.Sleep(30);
 
 		}
@@ -187,34 +240,30 @@ public partial class Lidar : Node3D
 
 	}
 
-	void NavegarParaPonto(Vector2 targetPoint, bool ModoContinuo = false, double ErroDistPox = 0.1, double multVel = 1.0, CancellationToken token = default(CancellationToken))
+	void NavegarParaPonto(Vector2 posObj, bool ModoContinuo = false, double ErroDistPox = 0.1, double multVel = 1.0, CancellationToken token = default(CancellationToken))
 	{
 
-		var currentLocation = sisLidar.PosCurr;
-		var Dist_final_inicio = Math.Sqrt(Math.Pow(currentLocation.X - targetPoint.X, 2) + Math.Pow(currentLocation.Y - targetPoint.Y, 2));
+		double DistPFim_Inicial = Meth.ObterDist(sisLidar.PosCurr, posObj);
+		double DistPFim = Meth.ObterDist(sisLidar.PosCurr, posObj);
 
 
-		double Dist_Prox = Math.Sqrt(Math.Pow(currentLocation.X - targetPoint.X, 2) + Math.Pow(currentLocation.Y - targetPoint.Y, 2));
-
-		while (Dist_Prox > ErroDistPox && !Emerg)
+		while (DistPFim > ErroDistPox && !Emerg)
 		{
-			currentLocation = sisLidar.PosCurr;
+			DistPFim = Meth.ObterDist(sisLidar.PosCurr, posObj);
+			double angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, posObj);
 
-			double angleToTarget = Math.Atan2(targetPoint.Y - currentLocation.Y, targetPoint.X - currentLocation.X);
-			double angleDifference = Meth.Rad4Deg(angleToTarget - sisLidar.AngCurr) / 360.0;
 
-			Dist_Prox = Math.Sqrt(Math.Pow(currentLocation.X - targetPoint.X, 2) + Math.Pow(currentLocation.Y - targetPoint.Y, 2));
+			int velRaw = (int)(DistPFim / DistPFim_Inicial * 400.0 * multVel);
+			int vel = Meth.SpeedControl(velRaw, 85);
 
-			int velRaw = (int)(Dist_Prox / Dist_final_inicio * 800.0 * multVel);
-			int vel = Meth.SpeedControl(velRaw, 70);
+			int steer = Meth.SpeedControl((int)(angleDifference / 180.0f * 300.0f * (2.0f - (DistPFim / DistPFim_Inicial))), 50);
 
-			RotinaUpdateRodarParaPonto(targetPoint, vel);
+			sisMotores.MandarSteer(steer, vel);
 
-			Log(Dist_Prox + "   aD" + Math.Round(angleDifference, 4) + "      vel: " + vel
-			);
-			Thread.Sleep(20);
+
+			Log($"DistPFim: {DistPFim:F4} VelMot: {vel} SteerMot: {steer}");
+			Thread.Sleep(40);
 			if (token.IsCancellationRequested || Emerg) return;
-
 		}
 
 
@@ -229,14 +278,18 @@ public partial class Lidar : Node3D
 		}
 
 	}
+
+
+	//N USADO
 	void RotinaUpdateRodarParaPonto(Vector2 targetPoint, int vel)
 	{
 		//double angleDifference = -Meth.ObterDifPos(sisLidar.PosCurr, Meth.Rad4Deg(sisLidar.AngCurr), targetPoint);//Meth.calcDifBetweenAngles(Meth.Rad4Deg(sisLidar.AngCurr), Meth.Rad4Deg(angleToTarget));
 		//Log($"Dif: {angleDifference} {sisLidar.AngCurr}");
 
 		//Take a look to this later.
-		double angleDifference = -Meth.ObterDifPos(targetPoint, Meth.Rad4Deg(sisLidar.AngCurr), sisLidar.PosCurr);//Meth.calcDifBetweenAngles(Meth.Rad4Deg(sisLidar.AngCurr), Meth.Rad4Deg(angleToTarget));
-		sisMotores.MandarSteer(Meth.SpeedControl((int)(angleDifference / 180 * 500), 45), vel);
+		//double angleDifference = -Meth.ObterDifPos(targetPoint, Meth.Rad4Deg(sisLidar.AngCurr), sisLidar.PosCurr);//Meth.calcDifBetweenAngles(Meth.Rad4Deg(sisLidar.AngCurr), Meth.Rad4Deg(angleToTarget));
+		double angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, targetPoint);
+		sisMotores.MandarSteer(Meth.SpeedControl((int)(angleDifference / 180 * 400), 60), vel);
 	}
 
 
@@ -326,11 +379,62 @@ public partial class Lidar : Node3D
 
 		boxParaPoses.Add(new CsgBox3D()
 		{
-			Position = OpVec.Vector2pVector3(pos, IDX),
+			Position = OpVec.Vector2pVector3(pos, 0),//IDX	
 			Size = new Vector3(0.01f, tamApontador, 0.01f),
 			Material = matPos,
 		});
-		AddChild(boxParaPoses[boxParaPoses.Count - 1]);
+		Call(MethodName.AddChild, boxParaPoses[boxParaPoses.Count - 1]);
+	}
+
+	void FazerTrace()
+	{
+		Log("T was pressed");
+
+		Log("A fazer limpeza...");
+
+		foreach (var child in boxParaPoses)
+		{
+			//RemoveChild(child);
+			child.Call(MethodName.QueueFree);
+			Call(MethodName.RemoveChild, child);
+		}
+		posesParaObj.Clear();
+		boxParaPoses.Clear();
+		idx_seg = 0;
+		posesParaObj = new();
+		Log("Limpesa ok!");
+
+		//(posmapa - TamMapa / 2) / (float)DivMapa de mapa para jogo
+		//new System.Numerics.Vector2(pos_obj.Position.X * (float)DivMapa + (TamMapa / 2), pos_obj.Position.Z * (float)DivMapa + (TamMapa / 2));
+
+		posObj = OpVec.Vector3pVector2(posObjCaixa.Position);
+
+		Log("A fazer...");
+		var sw = Stopwatch.StartNew();
+
+		var saida = sisFSD.Fazer(TamMapa, sisMapa.Dados_mapa, sisLidar.PosCurr, posObj, sisLidar.AngCurr);
+		Log("Concluido: " + sw.ElapsedMilliseconds + "ms");
+
+		image = ImageTexture.CreateFromImage(Image.CreateFromData(TamMapa, TamMapa, false, Image.Format.L8, saida.ImgTransformada));
+		//SpriteMapa.Texture = image;
+
+		for (int i = 0; i < saida.PontosCaminho.Count; i++)
+		{
+			Vector2 ponto = saida.PontosCaminho[i];
+			AdicionarPosObj(ponto, 1.1f, true, i / 100.0f);
+		}
+
+
+		for (int i = 0; i < saida.PontosCaminhoRaw.Count; i++)
+		{
+			Vector2 ponto = saida.PontosCaminhoRaw[i];
+			AdicionarPosObj(ponto, 0.09f, false, i / 1000.0f);
+		}
+
+		Log("Tempo total: " + sw.ElapsedMilliseconds + "ms");
+
+		sw.Restart();
+		Log($"Obj jogo: {posObj} start lidar: {sisLidar.PosCurr} Pontos:: {posesParaObj.Count}");
 
 	}
 
@@ -347,7 +451,9 @@ public partial class Lidar : Node3D
 		//Y definir objetivo
 		else if (Input.IsActionJustReleased("BtnY"))
 		{
-			posObj = new Vector2((float)Math.Round(camera.Pivot.Position.X, 2), (float)Math.Round(camera.Pivot.Position.Z, 2));
+			//			posObj = new Vector2((float)Math.Round(camera.Pivot.Position.X, 2), (float)Math.Round(camera.Pivot.Position.Z, 2));
+			posObj = new Vector2((float)camera.Pivot.Position.X, (float)camera.Pivot.Position.Z);
+
 			posObjCaixa.Position = OpVec.Vector2pVector3(posObj);
 		}
 	}
@@ -358,6 +464,8 @@ public partial class Lidar : Node3D
 			//Definir img
 			if (keyEvent.Keycode == Key.J)
 			{
+				image = ImageTexture.CreateFromImage(Image.CreateFromData(TamMapa, TamMapa, false, Image.Format.L8, sisMapa.Dados_mapa));
+
 				SpriteMapa.Texture = image;
 			}
 
@@ -367,61 +475,24 @@ public partial class Lidar : Node3D
 				//AdicionarPosObj(new Vector2((float)Math.Round(camera.Position.X, 2), (float)Math.Round(camera.Position.Z, 2)));
 			}
 
+			else if (keyEvent.Keycode == Key.H)
+			{
+				sisLidar.PosCurr = new Vector2((float)camera.Pivot.Position.X, (float)camera.Pivot.Position.Z);
+			}
+
 			else if (keyEvent.Keycode == Key.Z)
 			{
-				//sisFSD.Mult -= 1;
+				camera.ModoSet2D(!camera.Modo2D);
+				Log($"Modo camera 2D: {camera.Modo2D}");
 			}
 			else if (keyEvent.Keycode == Key.X)
 			{
-				//sisFSD.Mult += 1;
 			}
 
 			//T é o novo. Y(def obj) -> T(fazer percurso) -> G(go, ir para o lugar, mexer o robo)
 			else if (keyEvent.Keycode == Key.T)
 			{
-				Log("T was pressed");
-
-				Log("A fazer limpeza...");
-				posesParaObj.Clear();
-				foreach (var child in boxParaPoses)
-				{
-					RemoveChild(child);
-				}
-				boxParaPoses.Clear();
-				idx_seg = 0;
-				posesParaObj = new();
-				Log("Limpesa ok!");
-
-				//(posmapa - TamMapa / 2) / (float)DivMapa de mapa para jogo
-				//new System.Numerics.Vector2(pos_obj.Position.X * (float)DivMapa + (TamMapa / 2), pos_obj.Position.Z * (float)DivMapa + (TamMapa / 2));
-
-				posObj = OpVec.Vector3pVector2(posObjCaixa.Position);
-
-				Log("A fazer...");
-				var sw = Stopwatch.StartNew();
-
-				var saida = sisFSD.Fazer(TamMapa, sisMapa.Dados_mapa, sisLidar.PosCurr, posObj);
-				Log("Concluido: " + sw.ElapsedMilliseconds + "ms");
-
-				image = ImageTexture.CreateFromImage(Image.CreateFromData(TamMapa, TamMapa, false, Image.Format.L8, saida.ImgTransformada));
-				SpriteMapa.Texture = image;
-
-				for (int i = 0; i < saida.PontosCaminho.Count; i++)
-				{
-					Vector2 ponto = saida.PontosCaminho[i];
-					AdicionarPosObj(ponto, 1.1f, true, i / 100.0f);
-				}
-				for (int i = 0; i < saida.PontosCaminhoRaw.Count; i++)
-				{
-					Vector2 ponto = saida.PontosCaminhoRaw[i];
-					AdicionarPosObj(ponto, 0.09f, false, i / 1000.0f);
-				}
-
-				Log("Tempo total: " + sw.ElapsedMilliseconds + "ms");
-
-				sw.Restart();
-				Log($"Obj jogo: {posObj} start lidar: {sisLidar.PosCurr} end lidar: {posObj}");
-
+				FazerTrace();
 
 			}
 
@@ -460,7 +531,7 @@ public partial class Lidar : Node3D
 				{
 					sisMotores.MandarSteer(0, 0);
 					Emerg = true;
-					Thread.Sleep(50);
+					Thread.Sleep(20);
 				}
 				Log("Parar ok!");
 			}

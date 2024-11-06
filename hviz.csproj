@@ -12,4 +12,14 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Websocket.Client" Version="5.1.1" />
   </ItemGroup>
+
+
+  <ItemGroup>
+    <Content Remove="teste\**" />
+    <Compile Remove="teste\**" />
+    <EmbeddedResource Remove="teste\**" />
+    <None Remove="teste\**" />
+  </ItemGroup>
+
+
 </Project>

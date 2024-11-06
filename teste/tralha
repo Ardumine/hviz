@@ -1,0 +1,34 @@
+    public unsafe static byte[] EncodeStructArrayToByteArrayUsingMarshal(MyStruct[] structArray)
+    {
+        int size = Marshal.SizeOf(typeof(MyStruct));
+        byte[] byteArray = new byte[structArray.Length * size];
+
+        IntPtr ptr = Marshal.AllocHGlobal(size);
+
+        for (int i = 0; i < structArray.Length; i++)
+        {
+            Marshal.StructureToPtr(structArray[i], ptr, true);
+            Marshal.Copy(ptr, byteArray, i * size, size);
+        }
+
+        Marshal.FreeHGlobal(ptr);
+        return byteArray;
+    }
+
+        public static PontoLidar[] DecodeByteArrayToStructArrayUsingMarshal(byte[] byteArray)
+    {
+        int size = Marshal.SizeOf(typeof(PontoLidar));
+        int length = byteArray.Length / size;
+        PontoLidar[] structArray = new PontoLidar[length];
+
+        IntPtr ptr = Marshal.AllocHGlobal(size);
+
+        for (int i = 0; i < length; i++)
+        {
+            Marshal.Copy(byteArray, i * size, ptr, size);
+            structArray[i] = (PontoLidar)Marshal.PtrToStructure(ptr, typeof(PontoLidar));
+        }
+
+        Marshal.FreeHGlobal(ptr);
+        return structArray;
+    }

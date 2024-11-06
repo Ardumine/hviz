@@ -23,6 +23,8 @@ public class SistemaLidar
     public float AngCurr = 0f;
 
 
+    public bool AtivarCloud = true;
+
     private static WebsocketClient wsLidar;
     private static WebsocketClient wsPos;
 
@@ -56,8 +58,16 @@ public class SistemaLidar
             {
 
             }
-            Thread.Sleep(1400);
-            wsLidar.Send("lu");
+            new Thread(() =>
+            {
+
+                Thread.Sleep(1400);
+                if (AtivarCloud)
+                {
+                    wsLidar.Send("lu");
+                }
+            }).Start();
+
 
         });
 
@@ -68,16 +78,16 @@ public class SistemaLidar
             PosCurr = PosSLAMParaJogo(dados_recs.X, dados_recs.Y);
             AngCurr = dados_recs.Z;
 
-            Thread.Sleep(100);
+            Thread.Sleep(40);
             wsPos.Send("lu");
-            Godot.GD.Print("Dados Recebidos!");
+           // Godot.GD.Print("Dados Recebidos!");
 
         });
         wsLidar.Start();
         wsPos.Start();
 
         Thread.Sleep(1500);
-        wsLidar.Send("lu");
+        //wsLidar.Send("lu");
         wsPos.Send("lu");
 
 
@@ -86,7 +96,7 @@ public class SistemaLidar
 
     public static void MandarDadosStrWs(string dados)
     {
-        if (wsPos.IsRunning)
+        if (wsPos != null && wsPos.IsRunning)
         {
             wsPos.Send(dados);
         }

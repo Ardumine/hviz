@@ -1,4 +1,5 @@
 using System;
+using Emgu.CV;
 using Godot;
 
 public partial class Camera : Camera3D
@@ -12,7 +13,25 @@ public partial class Camera : Camera3D
 
 
     public static bool ModoCamera = true;
+    public bool Modo2D = false;
 
+    Vector3 rotAntModo3D;
+
+    public void ModoSet2D(bool modo)
+    {
+        Modo2D = modo;
+        if (Modo2D)
+        {
+            Input.MouseMode = Input.MouseModeEnum.Visible;
+            rotAntModo3D = Rotation;
+            Rotation = new Vector3((float)-Math.PI / 2.0f, 0, 0);
+        }
+        else
+        {
+            Rotation = rotAntModo3D;
+
+        }
+    }
 
     public void Setup()
     {
@@ -57,28 +76,50 @@ public partial class Camera : Camera3D
             dir = dir.Normalized();
             dir = dir.Rotated(Vector3.Up, Pivot.Rotation.Y);
 
-            Velocity = Meth.Lerp(Vector3.Zero, dir * TargetSpeed, ACCELERATION);
+            Velocity = Meth.Lerp(Vector3.Zero, dir * TargetSpeed, ACCELERATION + Pivot.Position.Y / 10);
             Pivot.Position += Velocity;
-
-
-
 
             //Parte rodar
             var XJoyStick = Input.GetActionStrength("DireitaCamera") - Input.GetActionStrength("EsquerdaCamera");
             var YJoyStick = Input.GetActionStrength("BaixoCamera") - Input.GetActionStrength("CimaCamera");
 
             Pivot.RotateY(-XJoyStick * MOUSE_SENSITIVITY);
-            RotateX(-YJoyStick * MOUSE_SENSITIVITY);
-            Rotation = new Vector3((float)Math.Clamp(Rotation.X, -Math.PI / 2, Math.PI / 2), Rotation.Y, Rotation.Z);
+
+            if (!Modo2D)
+            {
+                RotateX(-YJoyStick * MOUSE_SENSITIVITY);
+                Rotation = new Vector3((float)Math.Clamp(Rotation.X, -Math.PI / 2, Math.PI / 2), Rotation.Y, Rotation.Z);
+
+            }
 
         }
 
     }
+
+    private const float RayLength = 1000.0f;
+
+
+    public delegate void OnClick3DHandler(Vector3 pos);
+    public event OnClick3DHandler OnClick3D;
+
     public override void _Input(InputEvent @event)
     {
         if (!Current)
             return;
         if (!ModoCamera) return;
+        if (false)//Modo2D
+        {
+            if (@event is InputEventMouseButton mouseButtonEventa)
+            {
+                switch (mouseButtonEventa.ButtonIndex)
+                {
+                    case MouseButton.Left:
+                        Input.MouseMode = Input.MouseModeEnum.Visible;
+                        break;
+                }
+            }
+        }
+
         //base._Input(@event);
         Vector3 tempRot = Rotation;
 
@@ -86,15 +127,18 @@ public partial class Camera : Camera3D
         {
             if (@event is InputEventMouseMotion mouseMotionEvent)
             {
-
                 //Parte rodar
                 var XJoyStick = mouseMotionEvent.Relative.X / 10;
                 var YJoyStick = mouseMotionEvent.Relative.Y / 10;
 
-                Pivot.RotateY(-XJoyStick * MOUSE_SENSITIVITY);
-                RotateX(-YJoyStick * MOUSE_SENSITIVITY);
-                Rotation = new Vector3((float)Math.Clamp(Rotation.X, -Math.PI / 2, Math.PI / 2), Rotation.Y, Rotation.Z);
 
+                Pivot.RotateY(-XJoyStick * MOUSE_SENSITIVITY);
+
+                if (!Modo2D)
+                {
+                    RotateX(-YJoyStick * MOUSE_SENSITIVITY);
+                    Rotation = new Vector3((float)Math.Clamp(Rotation.X, -Math.PI / 2, Math.PI / 2), Rotation.Y, Rotation.Z);
+                }
             }
         }
 
@@ -113,6 +157,31 @@ public partial class Camera : Camera3D
             }
         }
 
+
+        if (@event is InputEventMouseButton mouseEvent)
+        {
+            if (mouseEvent.ButtonIndex == MouseButton.Left && mouseEvent.Pressed && Modo2D)
+            {
+
+                var spaceState = GetWorld3D().DirectSpaceState;
+                //Camera3D camera3D = GetTree().Root.GetCamera3D();
+                Camera3D camera3D = this;
+
+                var from = camera3D.ProjectRayOrigin(mouseEvent.Position);
+                var to = from + camera3D.ProjectRayNormal(mouseEvent.Position) * RayLength;
+
+                var query = PhysicsRayQueryParameters3D.Create(from, to);
+                var result = spaceState.IntersectRay(query);
+                if (result.Count > 0)
+                {
+                    var obj = (Node3D)result["collider"];
+                    OnClick3D?.Invoke(result["position"].AsVector3());
+                }
+                else{
+                }
+
+            }
+        }
 
     }
 
