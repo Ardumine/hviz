@@ -1,0 +1,37 @@
+[gd_scene load_steps=5 format=3 uid="uid://d2j8hhc1r8a6h"]
+
+[ext_resource type="Script" path="res://Modelos3D/FSD/PontoPathDesgin.cs" id="1_rripi"]
+[ext_resource type="Material" uid="uid://bwn6urdxi0qag" path="res://Modelos3D/FSD/shaderMaterialPontoInicial.tres" id="2_68x6e"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hkx6h"]
+size = Vector3(0.02, 0.5, 0.02)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_0caig"]
+height = 0.08
+radius = 0.06
+
+[node name="PontoPathDesgin" type="Node3D"]
+script = ExtResource("1_rripi")
+
+[node name="Box" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+size = Vector3(0.02, 0.5, 0.02)
+
+[node name="StaticBodyPontoPathDesgin" type="StaticBody3D" parent="Box"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Box/StaticBodyPontoPathDesgin"]
+shape = SubResource("BoxShape3D_hkx6h")
+
+[node name="Cyl" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0.5, 0)
+material_override = ExtResource("2_68x6e")
+radius = 0.1
+height = 0.1
+sides = 12
+cone = true
+
+[node name="StaticBodyPontoPathDesgin" type="StaticBody3D" parent="Cyl"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Cyl/StaticBodyPontoPathDesgin"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0114363, 9.9979e-10)
+shape = SubResource("CylinderShape3D_0caig")

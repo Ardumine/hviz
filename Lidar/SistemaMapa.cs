@@ -23,7 +23,13 @@ class SistemaMapa
 	{
 		Mat mat = CvInvoke.Imread(NomeFich, Emgu.CV.CvEnum.ImreadModes.Grayscale);
 		mat.CopyTo(Dados_mapa);
-		OnDadosRecebidos?.Invoke(Dados_mapa);
+		mat.Dispose();
+
+		new Thread(() =>
+		{
+			Thread.Sleep(300);
+			OnDadosRecebidos?.Invoke(Dados_mapa);
+		}).Start();
 
 	}
 	public void Iniciar(string IP, int tamMapa)

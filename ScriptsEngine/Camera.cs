@@ -17,6 +17,9 @@ public partial class Camera : Camera3D
 
     Vector3 rotAntModo3D;
 
+    public static System.Numerics.Vector2 PosCursor = new();
+    public static Node3D UltObj = new();
+
     public void ModoSet2D(bool modo)
     {
         Modo2D = modo;
@@ -151,33 +154,37 @@ public partial class Camera : Camera3D
                 case MouseButton.Right:
                     Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Captured ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Captured;
                     break;
-                case MouseButton.Left:
+                case MouseButton.Middle:
                     Input.MouseMode = Input.MouseModeEnum.Visible;
                     break;
             }
         }
 
 
-        if (@event is InputEventMouseButton mouseEvent)
+        if (@event is InputEventMouseMotion   || @event is InputEventMouseButton )
         {
-            if (mouseEvent.ButtonIndex == MouseButton.Left && mouseEvent.Pressed && Modo2D)
+            if (Input.IsMouseButtonPressed(MouseButton.Left))
             {
-
+                    
                 var spaceState = GetWorld3D().DirectSpaceState;
                 //Camera3D camera3D = GetTree().Root.GetCamera3D();
                 Camera3D camera3D = this;
 
-                var from = camera3D.ProjectRayOrigin(mouseEvent.Position);
-                var to = from + camera3D.ProjectRayNormal(mouseEvent.Position) * RayLength;
+                var from = camera3D.ProjectRayOrigin(GetViewport().GetMousePosition());
+                var to = from + camera3D.ProjectRayNormal(GetViewport().GetMousePosition()) * RayLength;
 
                 var query = PhysicsRayQueryParameters3D.Create(from, to);
                 var result = spaceState.IntersectRay(query);
                 if (result.Count > 0)
                 {
-                    var obj = (Node3D)result["collider"];
+                    UltObj = (Node3D)result["collider"];
+                    
+                    PosCursor = OpVec.Vector3pVector2(result["position"].AsVector3());
+
                     OnClick3D?.Invoke(result["position"].AsVector3());
                 }
-                else{
+                else
+                {
                 }
 
             }

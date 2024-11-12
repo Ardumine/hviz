@@ -1,0 +1,37 @@
+[gd_scene load_steps=3 format=3 uid="uid://b88adi52s3adh"]
+
+[ext_resource type="Script" path="res://Modelos3D/Fsd3d.cs" id="1_78je6"]
+
+[sub_resource type="Curve3D" id="Curve3D_cf2ww"]
+bake_interval = 136.13
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 2, 1),
+"tilts": PackedFloat32Array(0, 0, 0)
+}
+point_count = 3
+
+[node name="FSD3D" type="Node3D"]
+script = ExtResource("1_78je6")
+
+[node name="PathSpline" type="Path3D" parent="."]
+curve = SubResource("Curve3D_cf2ww")
+
+[node name="PathFollow3D" type="PathFollow3D" parent="PathSpline"]
+transform = Transform3D(-1, -6.6305e-08, -5.6977e-08, 0, 0.651741, -0.75844, 8.74228e-08, -0.75844, -0.651741, 0, 1.22732, 1.96923)
+visible = false
+progress = 2.53293
+
+[node name="CSGPolygon3D" type="CSGPolygon3D" parent="."]
+snap = 1e-06
+polygon = PackedVector2Array(-0.03125, 0.0625, 0.03125, 0.0625, 0.0625, 0, 0.03125, -0.0625, -0.03125, -0.0625, -0.0625, 0)
+mode = 2
+path_node = NodePath("../PathSpline")
+path_interval_type = 0
+path_interval = 0.01
+path_simplify_angle = 0.0
+path_rotation = 2
+path_local = false
+path_continuous_u = true
+path_u_distance = 0.64
+path_joined = false
+smooth_faces = true

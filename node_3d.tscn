@@ -1,17 +1,39 @@
-[gd_scene load_steps=8 format=3 uid="uid://bkqevw2coca08"]
+[gd_scene load_steps=13 format=3 uid="uid://bkqevw2coca08"]
 
 [ext_resource type="PackedScene" uid="uid://bkkj10q3pbskq" path="res://Lidar/Lidar.tscn" id="2_l2ofy"]
 [ext_resource type="Script" path="res://Lidar/Lidar.cs" id="3_jewwg"]
 [ext_resource type="Script" path="res://ScriptsEngine/Camera.cs" id="3_vq8cm"]
 [ext_resource type="Script" path="res://ScriptsEngine/TextBoxFps.cs" id="4_eq7xr"]
 [ext_resource type="PackedScene" uid="uid://q84rvibdihng" path="res://UI/UI_FSD.tscn" id="5_ulkbg"]
+[ext_resource type="PackedScene" uid="uid://b88adi52s3adh" path="res://Modelos3D/FSD3D.tscn" id="6_1xsf1"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_w63bv"]
+sky_top_color = Color(0.892074, 0.924623, 0.999511, 1)
+sky_horizon_color = Color(0.783695, 0.760126, 0.81573, 1)
+ground_bottom_color = Color(0.242706, 0.11588, 0.26341, 1)
+ground_horizon_color = Color(0.783695, 0.760126, 0.81573, 1)
+
+[sub_resource type="Sky" id="Sky_kw2c6"]
+sky_material = SubResource("ProceduralSkyMaterial_w63bv")
+
+[sub_resource type="Environment" id="Environment_4jfbg"]
+background_mode = 2
+sky = SubResource("Sky_kw2c6")
+tonemap_mode = 2
+glow_enabled = true
 
 [sub_resource type="SystemFont" id="SystemFont_xg6qs"]
 subpixel_positioning = 0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_t6w4r"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ct4ro"]
+albedo_color = Color(7.5084e-06, 0.987726, 0.989496, 1)
+
 [node name="Node3D" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_4jfbg")
 
 [node name="Lidar" parent="." instance=ExtResource("2_l2ofy")]
 script = ExtResource("3_jewwg")
@@ -45,6 +67,12 @@ shortcut_keys_enabled = false
 [node name="Camera" type="Camera3D" parent="."]
 script = ExtResource("3_vq8cm")
 
+[node name="OmniLight3D" type="OmniLight3D" parent="Camera"]
+visible = false
+light_size = 1.0
+light_specular = 1.0
+omni_range = 8.0
+
 [node name="TextBoxFPS" type="RichTextLabel" parent="."]
 anchors_preset = 1
 anchor_left = 1.0
@@ -64,9 +92,15 @@ offset_right = -3.0
 offset_bottom = 13.0
 
 [node name="CSGBox3D" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
 
 [node name="StaticBodyCaixa" type="StaticBody3D" parent="CSGBox3D"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D/StaticBodyCaixa"]
 shape = SubResource("BoxShape3D_t6w4r")
+
+[node name="BoxApontador" type="CSGBox3D" parent="."]
+size = Vector3(0.01, 1, 0.01)
+material = SubResource("StandardMaterial3D_ct4ro")
+
+[node name="fsd3D" parent="." instance=ExtResource("6_1xsf1")]

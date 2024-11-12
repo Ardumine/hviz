@@ -41,7 +41,7 @@ class Meth
     /// <param name="angSrcRad">Deg</param>
     /// <param name="posObj"></param>
     /// <returns>Angulo de dif em Deg</returns>
-    public static double ObterDifAng(System.Numerics.Vector2 posSrc, double angSrcRad, System.Numerics.Vector2 posObj)
+    public static double ObterDifAng(Vector2 posSrc, double angSrcRad, Vector2 posObj)
     {
         // Calculate the difference vector between target and current positions
         double dx = posObj.X - posSrc.X;
@@ -54,7 +54,7 @@ class Meth
         double targetAngleDegrees = Rad4Deg(targetAngleRadians);
 
         // Calculate the difference in angle between current orientation and target position
-        double angleDifference = targetAngleDegrees - Meth.Rad4Deg(angSrcRad);
+        double angleDifference = targetAngleDegrees - Rad4Deg(angSrcRad);
 
         // Normalize the angle difference to be within [-180, 180] degrees
         if (angleDifference > 180) { angleDifference -= 360; }
@@ -65,10 +65,22 @@ class Meth
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="angDeg">entre 0 e 360</param>
+    /// <returns></returns>
+    public static double NormAng(double angDeg)
+    {
+        angDeg = angDeg % 360;
+
+        return angDeg > 0 ? angDeg : 360 - angDeg;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="posSrc"></param>
     /// <param name="posObj"></param>
     /// <returns>Angulo de dif em rad</returns>
-    public static double ObterDifAngRad(System.Numerics.Vector2 posSrc, System.Numerics.Vector2 posObj)
+    public static double ObterDifAngRad(Vector2 posSrc, Vector2 posObj)
     {
         // Calculate the difference vector between target and current positions
         double dx = posObj.X - posSrc.X;
@@ -80,6 +92,20 @@ class Meth
         return targetAngleRadians;
     }
 
+
+    public static Vector2 RotatePoint(Vector2 pointToRotate, double angleInDegrees)
+    {
+        double angleInRadians = Meth.Deg4Rad(angleInDegrees);
+        float cosTheta = (float)Math.Cos(angleInRadians);
+        float sinTheta = (float)Math.Sin(angleInRadians);
+
+
+        // Rotate the point by the degrees
+        float x = pointToRotate.X * cosTheta - pointToRotate.Y * sinTheta;
+        float y = pointToRotate.X * sinTheta + pointToRotate.Y * cosTheta;
+
+        return new Vector2(x, y);
+    }
 
     public static int SpeedControl(int desiredSpeed, int MaxSpeed)
     {

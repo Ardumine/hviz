@@ -9,7 +9,8 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Vector2 = System.Numerics.Vector2;
 
-class SistemaFSD
+namespace Ardumine.SistemaFSD;
+class PlaneadorAuto
 {
 	public float Mult = 10.0f;
 	public int IDXSelect = 1;

@@ -1,8 +1,10 @@
+using Ardumine.SistemaFSD.GUI;
 using BaseSLAM;
 using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using Vector2 = System.Numerics.Vector2;
@@ -11,6 +13,9 @@ public partial class Lidar : Node3D
 {
 	bool Emerg = false;
 	Vector2 posObj;
+	Vector2 PosCursor = Vector2.Zero;
+	List<Vector2> PosesParaSpline = new();
+	List<Vector2> SaidaSpline = new();
 
 	string IP = "192.168.137.5";//192.168.137.5 127.0.0.1
 	ScanCloud scanCloud;
@@ -24,13 +29,14 @@ public partial class Lidar : Node3D
 	OptionButton optTipoAlgo;
 	Sprite3D SpriteMapa;
 	ImageTexture image;
+	Fsd3d fsd3D;
 
 
 	static int TamMapa = 1000;
 	SistemaLidar sisLidar;
 	SistemaMotores sisMotores;
 	SistemaMapa sisMapa;
-	SistemaFSD sisFSD;
+	Ardumine.SistemaFSD.PlaneadorAuto sisFSD;
 
 	List<Ray> dadosLidar = new();
 
@@ -40,9 +46,7 @@ public partial class Lidar : Node3D
 	int idx_seg = 0;
 
 
-	void Criar(){
 
-	}
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -54,15 +58,17 @@ public partial class Lidar : Node3D
 		camera = GetNode<Camera>("../Camera");
 		BoxApontador = GetNode<CsgBox3D>("../BoxApontador");
 		LogTextBox = GetNode<RichTextLabel>("../LogTextBox");
+		fsd3D = GetNode<Fsd3d>("../fsd3D");
 
 		sliderImportPesoFSD = GetNode<Slider>("../UI_FSD/gd/peso/slider");
 		optTipoAlgo = GetNode<OptionButton>("../UI_FSD/gd/heuristic/optTipoAlgo");
 		Iniciar();
 
 
-		camera.OnClick3D += (pos) =>{
-			var pos2D = OpVec.Vector3pVector2(pos);
-			Log(pos);	
+		camera.OnClick3D += (pos) =>
+		{
+			PosCursor = OpVec.Vector3pVector2(pos);
+			BoxApontador.Position = OpVec.Vector2pVector3(PosCursor);
 		};
 
 
@@ -87,7 +93,7 @@ public partial class Lidar : Node3D
 		//pos_obj.Visible = false;
 
 		sisLidar = new SistemaLidar(TamMapa);
-		sisLidar.Iniciar(IP);
+		//sisLidar.Iniciar(IP);
 		sisLidar.OnDadosRecebidos += (dados) =>
 		{
 			Log("Dados Lidar REC!" + dados.Count);
@@ -96,9 +102,8 @@ public partial class Lidar : Node3D
 		};
 
 		sisMapa = new SistemaMapa();
-		sisMapa.Iniciar(IP, TamMapa);
-		//sisMapa.LoadMapaBMP("mt.bmp");
-		image = ImageTexture.CreateFromImage(Image.CreateFromData(TamMapa, TamMapa, false, Image.Format.L8, sisMapa.Dados_mapa));
+		//sisMapa.Iniciar(IP, TamMapa);
+		sisMapa.LoadMapaBMP("mt.bmp");
 
 		sisMapa.OnDadosRecebidos += (dados) =>
 		{
@@ -106,9 +111,9 @@ public partial class Lidar : Node3D
 		};
 
 		sisMotores = new SistemaMotores();
-		sisMotores.IniMotores();
+		//sisMotores.IniMotores();
 
-		sisFSD = new SistemaFSD();
+		sisFSD = new Ardumine.SistemaFSD.PlaneadorAuto();
 		Log(System.Environment.GetEnvironmentVariable("LD_LIBRARY_PATH"));
 	}
 
@@ -119,38 +124,18 @@ public partial class Lidar : Node3D
 		//Fase 1 virar para o primeiro ponto
 		for (idx_seg = 0; idx_seg < PontosParaIr.Count; idx_seg++)
 		{
-			var angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, PontosParaIr[idx_seg]);
+			//var angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, PontosParaIr[idx_seg]);
 
-			double Dist_Prox = Meth.ObterDist(sisLidar.PosCurr, PontosParaIr[idx_seg]);
+			//double Dist_Prox = Meth.ObterDist(sisLidar.PosCurr, PontosParaIr[idx_seg]);
 
 
-			if (Math.Abs(angleDifference) > 20 && Dist_Prox > 0.10)
+			/*if (Math.Abs(angleDifference) > 20 && Dist_Prox > 0.10)
 			{
 				//Rodar
 				sisMotores.MandarSteer(0, 0);
 				RodarParaGrau(PontosParaIr[idx_seg], true, 15, 0.2, token);
-				/*new Thread(() =>
-				{
-					sisMotores.MandarSteer(0, 0);
-					Thread.Sleep(100);
+			}*/
 			if (token.IsCancellationRequested || Emerg) return;
-
-					sisMotores.MandarSteer(0, 0);
-					FazerTrace();
-			if (token.IsCancellationRequested || Emerg) return;
-
-					Thread.Sleep(1000);
-					new Thread(() =>
-					{
-					Thread.Sleep(100);
-						SeguirPontos(posesParaObj);
-					}).Start();
-				}).Start();
-				break;
-				*/
-			}
-			if (token.IsCancellationRequested || Emerg) return;
-			///NavegarParaPonto(PontosParaIr[idx_seg], true, 0.2, 0.9, token);
 
 			IrParaPonto(PontosParaIr[idx_seg], true);
 			if (token.IsCancellationRequested || Emerg) return;
@@ -175,8 +160,6 @@ public partial class Lidar : Node3D
 
 	void IrParaPonto(Vector2 targetPoint, bool ModoContinuo = false, CancellationToken token = default(CancellationToken))
 	{
-		//double angleToTarget = Math.Atan2(targetPoint.Y, targetPoint.X);
-
 		var angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, targetPoint);
 
 		double Dist_Prox = Meth.ObterDist(sisLidar.PosCurr, targetPoint);
@@ -188,7 +171,7 @@ public partial class Lidar : Node3D
 				//Rodar
 				sisMotores.MandarSteer(0, 0);
 				sisMotores.MandarSteer(0, 0);
-				RodarParaGrau(targetPoint, true, 20, 0.2, token);
+				RodarParaGrau(targetPoint, true, 30, 0.2, token);
 			}
 			if (token.IsCancellationRequested || Emerg) return;
 			NavegarParaPonto(targetPoint, true, 0.2, 0.9, token);
@@ -203,7 +186,6 @@ public partial class Lidar : Node3D
 			}
 			if (token.IsCancellationRequested || Emerg) return;
 			NavegarParaPonto(targetPoint, token: token);
-
 		}
 
 	}
@@ -211,24 +193,22 @@ public partial class Lidar : Node3D
 	void RodarParaGrau(Vector2 targetPoint, bool ModoContinuo = false, int AngMaxDif = 5, double ErroDistPox = 0.1, CancellationToken token = default(CancellationToken))
 	{
 
-		double angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, targetPoint);//Meth.calcDifBetweenAngles(Meth.Rad4Deg(sisLidar.AngCurr), Meth.Rad4Deg(angleToTarget));
+		double angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, targetPoint);
 		double Dist_Prox = Meth.ObterDist(sisLidar.PosCurr, targetPoint);
 
 		while (Math.Abs(angleDifference) > AngMaxDif && !Emerg && Dist_Prox > ErroDistPox)
 		{
-
-			//angleDifference = Meth.ObterDifPos(sisLidar.PosCurr, Meth.Rad4Deg(sisLidar.AngCurr), targetPoint);//Meth.calcDifBetweenAngles(Meth.Rad4Deg(sisLidar.AngCurr), Meth.Rad4Deg(angleToTarget));
-
 			//Take a look to this later.
-			angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, targetPoint);//Meth.calcDifBetweenAngles(Meth.Rad4Deg(sisLidar.AngCurr), Meth.Rad4Deg(angleToTarget));
+			angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, targetPoint);
 
-			int steer = Meth.SpeedControl((int)(angleDifference / 180.0 * 1200.0), 130);
+			int steer = Meth.SpeedControl((int)(angleDifference / 180.0 * 1200.0), 140);
 			Log($"RodParaProxPonto DifAng: {angleDifference:F2} LidAngCurr: {sisLidar.AngCurr:F2} MotSteer: {steer:F2}");
 			sisMotores.MandarSteer(steer, 0);
 			if (token.IsCancellationRequested || Emerg) return;
 			Dist_Prox = Meth.ObterDist(sisLidar.PosCurr, targetPoint);
 
 			Thread.Sleep(30);
+			if (token.IsCancellationRequested || Emerg) return;
 
 		}
 		if (!ModoContinuo)
@@ -256,7 +236,7 @@ public partial class Lidar : Node3D
 			int velRaw = (int)(DistPFim / DistPFim_Inicial * 400.0 * multVel);
 			int vel = Meth.SpeedControl(velRaw, 85);
 
-			int steer = Meth.SpeedControl((int)(angleDifference / 180.0f * 300.0f * (2.0f - (DistPFim / DistPFim_Inicial))), 50);
+			int steer = Meth.SpeedControl((int)(angleDifference / 180.0f * 400.0f * (2.0f - (DistPFim / DistPFim_Inicial))), 60);
 
 			sisMotores.MandarSteer(steer, vel);
 
@@ -386,9 +366,15 @@ public partial class Lidar : Node3D
 		Call(MethodName.AddChild, boxParaPoses[boxParaPoses.Count - 1]);
 	}
 
-	void FazerTrace()
+
+	void AdicionarPontoPathDesgin(Vector2 pos)
 	{
-		Log("T was pressed");
+
+	}
+
+
+	void FazerLimpeza()
+	{
 
 		Log("A fazer limpeza...");
 
@@ -398,11 +384,22 @@ public partial class Lidar : Node3D
 			child.Call(MethodName.QueueFree);
 			Call(MethodName.RemoveChild, child);
 		}
+
+		PosesParaSpline.Clear();
+
 		posesParaObj.Clear();
 		boxParaPoses.Clear();
 		idx_seg = 0;
 		posesParaObj = new();
+
+
 		Log("Limpesa ok!");
+	}
+
+	void FazerTrace()
+	{
+		Log("T was pressed");
+		FazerLimpeza();
 
 		//(posmapa - TamMapa / 2) / (float)DivMapa de mapa para jogo
 		//new System.Numerics.Vector2(pos_obj.Position.X * (float)DivMapa + (TamMapa / 2), pos_obj.Position.Z * (float)DivMapa + (TamMapa / 2));
@@ -444,7 +441,6 @@ public partial class Lidar : Node3D
 		if (Input.IsActionJustReleased("MudarModoMover"))
 		{
 			Camera.ModoCamera = !Camera.ModoCamera;
-
 			Log("Modo usar camera: " + Camera.ModoCamera);
 		}
 
@@ -452,7 +448,7 @@ public partial class Lidar : Node3D
 		else if (Input.IsActionJustReleased("BtnY"))
 		{
 			//			posObj = new Vector2((float)Math.Round(camera.Pivot.Position.X, 2), (float)Math.Round(camera.Pivot.Position.Z, 2));
-			posObj = new Vector2((float)camera.Pivot.Position.X, (float)camera.Pivot.Position.Z);
+			posObj = PosCursor;
 
 			posObjCaixa.Position = OpVec.Vector2pVector3(posObj);
 		}
@@ -469,15 +465,9 @@ public partial class Lidar : Node3D
 				SpriteMapa.Texture = image;
 			}
 
-			//Não usado
-			else if (keyEvent.Keycode == Key.Y)
-			{
-				//AdicionarPosObj(new Vector2((float)Math.Round(camera.Position.X, 2), (float)Math.Round(camera.Position.Z, 2)));
-			}
-
 			else if (keyEvent.Keycode == Key.H)
 			{
-				sisLidar.PosCurr = new Vector2((float)camera.Pivot.Position.X, (float)camera.Pivot.Position.Z);
+				sisLidar.PosCurr = PosCursor;
 			}
 
 			else if (keyEvent.Keycode == Key.Z)
@@ -485,9 +475,18 @@ public partial class Lidar : Node3D
 				camera.ModoSet2D(!camera.Modo2D);
 				Log($"Modo camera 2D: {camera.Modo2D}");
 			}
-			else if (keyEvent.Keycode == Key.X)
+
+			/*else if (keyEvent.Keycode == Key.B)
 			{
+				var saida = CubicSpline.InterpolateXY(PosesParaSpline.ToArray(), 200);
+				//PosesParaSpline.Clear();
+				PathSpline.Curve.ClearPoints();
+				foreach (var ponto in saida)
+				{
+					PathSpline.Curve.AddPoint(OpVec.Vector2pVector3(ponto));
+				}
 			}
+*/
 
 			//T é o novo. Y(def obj) -> T(fazer percurso) -> G(go, ir para o lugar, mexer o robo)
 			else if (keyEvent.Keycode == Key.T)
@@ -509,8 +508,8 @@ public partial class Lidar : Node3D
 			//Fazer limpeza(limpar todos os pontos obj)
 			else if (keyEvent.Keycode == Key.Backspace)
 			{
-
-				Log("A fazer limpeza...");
+				FazerLimpeza();
+				/*Log("A fazer limpeza...");
 				posesParaObj.Clear();
 				foreach (var child in boxParaPoses)
 				{
@@ -520,7 +519,7 @@ public partial class Lidar : Node3D
 				idx_seg = 0;
 				posesParaObj = new();
 				Log("Ok!");
-
+*/
 			}
 
 			//Para emergencia
