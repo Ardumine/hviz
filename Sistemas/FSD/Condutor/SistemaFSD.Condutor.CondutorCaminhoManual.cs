@@ -6,7 +6,7 @@ using Godot;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Ardumine.SistemaFSD.Condutor;
-class CaminhoManual
+class CondutorCaminhoManual
 {
     List<Vector2> Caminho { get; set; }
     bool Emerg = false;

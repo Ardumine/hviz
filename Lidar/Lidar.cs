@@ -37,6 +37,7 @@ public partial class Lidar : Node3D
 	SistemaMotores sisMotores;
 	SistemaMapa sisMapa;
 	Ardumine.SistemaFSD.PlaneadorAuto sisFSD;
+	Ardumine.SistemaFSD.Condutor.CondutorCaminhoAuto condutorAuto;
 
 	List<Ray> dadosLidar = new();
 
@@ -103,7 +104,7 @@ public partial class Lidar : Node3D
 
 		sisMapa = new SistemaMapa();
 		//sisMapa.Iniciar(IP, TamMapa);
-		sisMapa.LoadMapaBMP("testingMap.bmp");
+		sisMapa.LoadMapaBMP("testing/testingMap.bmp");
 
 		sisMapa.OnDadosRecebidos += (dados) =>
 		{
@@ -113,7 +114,8 @@ public partial class Lidar : Node3D
 		sisMotores = new SistemaMotores();
 		//sisMotores.IniMotores();
 
-		sisFSD = new Ardumine.SistemaFSD.PlaneadorAuto();
+		sisFSD = new();
+		condutorAuto = new();
 		Log(System.Environment.GetEnvironmentVariable("LD_LIBRARY_PATH"));
 	}
 
@@ -492,16 +494,18 @@ public partial class Lidar : Node3D
 			else if (keyEvent.Keycode == Key.T)
 			{
 				FazerTrace();
-
 			}
 
 			//Go, Seguir caminho
 			else if (keyEvent.Keycode == Key.G)
 			{
 				Emerg = false;
+				condutorAuto.Preparar(sisLidar, sisMotores, Log);
+
 				new Thread(() =>
 				{
-					SeguirPontos(posesParaObj);
+					condutorAuto.SeguirPontos(posesParaObj);
+					//SeguirPontos(posesParaObj);
 				}).Start();
 			}
 
@@ -526,6 +530,7 @@ public partial class Lidar : Node3D
 			else if (keyEvent.Keycode == Key.P)
 			{
 				Log("A parar!!");
+				condutorAuto.PararEmerg();
 				for (int i = 0; i < 20; i++)
 				{
 					sisMotores.MandarSteer(0, 0);

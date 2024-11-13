@@ -225,9 +225,7 @@ public partial class Fsd3d : Node3D
 	{
 		List<Vector2> Pontos = new();
 		double ultAng = 0;
-		double ultAng2 = 0;
 		var PontoInicial = Instrucoes[0].PInicial;
-		Vector2 ultPonto = PontoInicial;
 		for (int i = 0; i < Instrucoes.Count; i++)//Hell
 		{
 			Vector2 ini = Instrucoes[i].PInicial;
@@ -254,7 +252,6 @@ public partial class Fsd3d : Node3D
 			//Instrucoes[i].Pontos = ObterPontos(ini, fim, Instrucoes[i].AngP);
 
 			Pontos.AddRange(Instrucoes[i].Pontos);
-			ultPonto = Instrucoes[i].PInicial;
 		}
 		return FiltrarPontos(Pontos);
 	}

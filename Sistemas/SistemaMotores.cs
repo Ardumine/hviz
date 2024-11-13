@@ -66,7 +66,7 @@ class SistemaMotores
 
 	public void MandarSteer(int steer, int vel)
 	{
-		if (ultSpeed != vel || ultSteer != steer)
+		if ((ultSpeed != vel || ultSteer != steer) || vel == 0)
 		{
 			SistemaLidar.MandarDadosStrWs($"{steer}, {vel}|");
 			ultSteer = steer;
