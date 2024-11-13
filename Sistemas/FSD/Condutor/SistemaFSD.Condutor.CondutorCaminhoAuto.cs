@@ -24,6 +24,7 @@ class CondutorCaminhoAuto
 
     public void PararEmerg()
     {
+        Log("A parar condutor auto!!");
         new Thread(() =>
         {
             for (int i = 0; i < 10; i++)
@@ -33,7 +34,7 @@ class CondutorCaminhoAuto
             }
         }).Start();
     }
-    
+
     //Seguir pontos
     public void SeguirPontos(List<Vector2> PontosParaIr, CancellationToken token = default(CancellationToken))
     {
