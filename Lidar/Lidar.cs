@@ -103,7 +103,7 @@ public partial class Lidar : Node3D
 
 		sisMapa = new SistemaMapa();
 		//sisMapa.Iniciar(IP, TamMapa);
-		sisMapa.LoadMapaBMP("mt.bmp");
+		sisMapa.LoadMapaBMP("testingMap.bmp");
 
 		sisMapa.OnDadosRecebidos += (dados) =>
 		{
