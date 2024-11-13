@@ -1,15 +1,13 @@
 using System;
-using System.Numerics;
 using System.Collections.Generic;
 using System.Threading;
-using Godot;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Ardumine.SistemaFSD.Condutor;
 class CondutorCaminhoAuto
 {
     bool Emerg = false;
-    int IdxCurr = 0;
+    public int IdxCurr = 0;
     SistemaLidar sisLidar;
     SistemaMotores sisMotores;
     Action<string> Log;
@@ -38,6 +36,7 @@ class CondutorCaminhoAuto
     //Seguir pontos
     public void SeguirPontos(List<Vector2> PontosParaIr, CancellationToken token = default(CancellationToken))
     {
+        Emerg = false;
         //Fase 1 virar para o primeiro ponto
         for (IdxCurr = 0; IdxCurr < PontosParaIr.Count; IdxCurr++)
         {

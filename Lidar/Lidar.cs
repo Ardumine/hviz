@@ -44,7 +44,7 @@ public partial class Lidar : Node3D
 
 	List<CsgBox3D> boxParaPoses = new();
 	List<Vector2> posesParaObj = new();
-	int idx_seg = 0;
+	int idx_segAnt = 0;
 
 
 
@@ -124,7 +124,7 @@ public partial class Lidar : Node3D
 	void SeguirPontos(List<Vector2> PontosParaIr, CancellationToken token = default(CancellationToken))
 	{
 		//Fase 1 virar para o primeiro ponto
-		for (idx_seg = 0; idx_seg < PontosParaIr.Count; idx_seg++)
+		for (idx_segAnt = 0; idx_segAnt < PontosParaIr.Count; idx_segAnt++)
 		{
 			//var angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, PontosParaIr[idx_seg]);
 
@@ -139,7 +139,7 @@ public partial class Lidar : Node3D
 			}*/
 			if (token.IsCancellationRequested || Emerg) return;
 
-			IrParaPonto(PontosParaIr[idx_seg], true);
+			IrParaPonto(PontosParaIr[idx_segAnt], true);
 			if (token.IsCancellationRequested || Emerg) return;
 
 		}
@@ -317,12 +317,12 @@ public partial class Lidar : Node3D
 			{
 				try
 				{
-					for (int i = 1; i < idx_seg; i++)
+					for (int i = 1; i < condutorAuto.IdxCurr; i++)
 					{
 						boxParaPoses[i - 1].Material = matPosConc;
 
 					}
-					boxParaPoses[idx_seg - 1].Material = matPosFazer;
+					boxParaPoses[condutorAuto.IdxCurr - 1].Material = matPosFazer;
 
 				}
 				catch
@@ -391,7 +391,7 @@ public partial class Lidar : Node3D
 
 		posesParaObj.Clear();
 		boxParaPoses.Clear();
-		idx_seg = 0;
+		//idx_seg = 0;
 		posesParaObj = new();
 
 
@@ -434,6 +434,9 @@ public partial class Lidar : Node3D
 
 		sw.Restart();
 		Log($"Obj jogo: {posObj} start lidar: {sisLidar.PosCurr} Pontos:: {posesParaObj.Count}");
+
+		condutorAuto.Preparar(sisLidar, sisMotores, Log);
+
 
 	}
 
@@ -500,7 +503,6 @@ public partial class Lidar : Node3D
 			else if (keyEvent.Keycode == Key.G)
 			{
 				Emerg = false;
-				condutorAuto.Preparar(sisLidar, sisMotores, Log);
 
 				new Thread(() =>
 				{
