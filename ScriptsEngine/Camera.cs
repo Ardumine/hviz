@@ -103,25 +103,14 @@ public partial class Camera : Camera3D
 
 
     public delegate void OnClick3DHandler(Vector3 pos);
-    public event OnClick3DHandler OnClick3D;
+    public static event OnClick3DHandler OnClick3D;
 
     public override void _Input(InputEvent @event)
     {
         if (!Current)
             return;
         if (!ModoCamera) return;
-        if (false)//Modo2D
-        {
-            if (@event is InputEventMouseButton mouseButtonEventa)
-            {
-                switch (mouseButtonEventa.ButtonIndex)
-                {
-                    case MouseButton.Left:
-                        Input.MouseMode = Input.MouseModeEnum.Visible;
-                        break;
-                }
-            }
-        }
+      
 
         //base._Input(@event);
         Vector3 tempRot = Rotation;
@@ -183,9 +172,7 @@ public partial class Camera : Camera3D
 
                     OnClick3D?.Invoke(result["position"].AsVector3());
                 }
-                else
-                {
-                }
+                
 
             }
         }

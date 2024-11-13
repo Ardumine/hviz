@@ -3,16 +3,19 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using Godot;
-using IPMapper;
 //using System.IO.Ports;
 //<PackageReference Include="System.IO.Ports" Version="8.0.0" />
 
 class SistemaMotores
 {
+
+	//SerialPort porta = new SerialPort();
+#if modoMotoresWifi
+	using IPMapper;
+	
 	TcpClient client = new();
 	NetworkStream stream_motores;
 	bool conectado = false;
-	//SerialPort porta = new SerialPort();
 
 	public void ConESPAA()
 	{
@@ -38,26 +41,6 @@ class SistemaMotores
 		MandarSteer(0, 0);*/
 
 	}
-
-	double maxVel = 100;
-	double maxSteer = 500;
-
-	int ultSteer = -100000;
-	int ultSpeed = -100000;
-
-	public void MandarSteer(int steer, int vel)
-	{
-		if (ultSpeed != vel || ultSteer != steer)
-		{
-			SistemaLidar.MandarDadosStrWs($"{steer}, {vel}|");
-			ultSteer = steer;
-			ultSpeed = vel;
-		}
-		//porta.Write($"{steer}, {vel}|");
-		//<   porta.Write($"{steer * maxSteer}, {vel * maxVel}|");
-
-	}
-
 	public void Mand_dadosAA(double velA, double velB)
 	{
 		velA = Math.Round(velA);
@@ -75,6 +58,26 @@ class SistemaMotores
 			}
 		}
 	}
+
+#endif
+
+	int ultSteer = -100000;
+	int ultSpeed = -100000;
+
+	public void MandarSteer(int steer, int vel)
+	{
+		if (ultSpeed != vel || ultSteer != steer)
+		{
+			SistemaLidar.MandarDadosStrWs($"{steer}, {vel}|");
+			ultSteer = steer;
+			ultSpeed = vel;
+		}
+		//porta.Write($"{steer}, {vel}|");
+		//<   porta.Write($"{steer * maxSteer}, {vel * maxVel}|");
+
+	}
+
+	
 
 
 

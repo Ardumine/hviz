@@ -35,3 +35,9 @@ cone = true
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Cyl/StaticBodyPontoPathDesgin"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0114363, 9.9979e-10)
 shape = SubResource("CylinderShape3D_0caig")
+
+[node name="lbl" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0.2, 0)
+outline_modulate = Color(0, 0, 0, 0)
+text = "0"
+font_size = 29

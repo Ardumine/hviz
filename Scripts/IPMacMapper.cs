@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+#if modoMotoresWifi
 
 namespace IPMapper
 {
@@ -73,3 +74,4 @@ namespace IPMapper
         }
     }
 }
+#endif

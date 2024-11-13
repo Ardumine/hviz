@@ -65,7 +65,7 @@ public partial class Lidar : Node3D
 		Iniciar();
 
 
-		camera.OnClick3D += (pos) =>
+		Camera.OnClick3D += (pos) =>
 		{
 			PosCursor = OpVec.Vector3pVector2(pos);
 			BoxApontador.Position = OpVec.Vector2pVector3(PosCursor);

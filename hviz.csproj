@@ -19,6 +19,28 @@
     <Compile Remove="teste\**" />
     <EmbeddedResource Remove="teste\**" />
     <None Remove="teste\**" />
+
+    <Content Remove="dadosSaida\**" />
+    <Compile Remove="dadosSaida\**" />
+    <EmbeddedResource Remove="dadosSaida\**" />
+    <None Remove="dadosSaida\**" />
+
+    <Content Remove="docs\**" />
+    <Compile Remove="docs\**" />
+    <EmbeddedResource Remove="docs\**" />
+    <None Remove="docs\**" />
+
+    <Content Remove="tralha\**" />
+    <Compile Remove="tralha\**" />
+    <EmbeddedResource Remove="tralha\**" />
+    <None Remove="tralha\**" />
+
+    <Content Remove="build\**" />
+    <Compile Remove="build\**" />
+    <EmbeddedResource Remove="build\**" />
+    <None Remove="build\**" />
+
+    
   </ItemGroup>
 
 

@@ -24,6 +24,25 @@ public partial class Fsd3d : Node3D
 		shaderCorPontoIncial = GD.Load<BaseMaterial3D>("res://Modelos3D/FSD/shaderMaterialPontoInicial.tres");
 		shaderCorPontoFinal = GD.Load<BaseMaterial3D>("res://Modelos3D/FSD/shaderMaterialPontoFinal.tres");
 		PathSpline = GetNode<Path3D>("PathSpline");
+		Camera.OnClick3D += (e) =>
+		{
+			if (AtivarMover)
+			{
+				var sw = Stopwatch.StartNew();
+				//ReDrawPontos(ObterPontosTotais());
+				UpdateDesginerPontos();
+				//GD.Print($"Tempo update loop: {sw.ElapsedMilliseconds}");
+			}
+		};
+		/*OnBtnAdicionarCurva(new Vector2(0.5f, -0.022f), 2.8f, -0.1f);//0
+		OnBtnAdicionarCurva(new Vector2(4.1f, 0.8f));
+		OnBtnAdicionarCurva(new Vector2(4.3f, 3.4f));
+		OnBtnAdicionarCurva(new Vector2(3.07f, 4.28f));
+		OnBtnAdicionarCurva(new Vector2(0.45f, 4.38f));
+		OnBtnAdicionarCurva(new Vector2(-0.5f, 3.006f));
+		OnBtnAdicionarCurva(new Vector2(-2.28f, 1.65f));
+		AtivarMover = false;
+*/
 
 	}
 
@@ -39,14 +58,20 @@ public partial class Fsd3d : Node3D
 		{
 			node.GetChild<CsgPrimitive3D>(0).MaterialOverlay = shaderCorPontoIncial;
 			node.GetChild<CsgPrimitive3D>(1).MaterialOverlay = shaderCorPontoIncial;
+			node.GetChild<Label3D>(2).Position = new Vector3(0, 0.2f, 0);
 
 		}
 		else
 		{
 			node.GetChild<CsgPrimitive3D>(0).MaterialOverlay = shaderCorPontoFinal;
 			node.GetChild<CsgPrimitive3D>(1).MaterialOverlay = shaderCorPontoFinal;
+			node.GetChild<Label3D>(2).Position = new Vector3(0, 0.56f, 0);
 
 		}
+		node.GetChild(0).GetChild(0).GetChild<CollisionShape3D>(0).Disabled = true;
+		node.GetChild(1).GetChild(0).GetChild<CollisionShape3D>(0).Disabled = true;
+
+		node.GetChild<Label3D>(2).Text = id.ToString();
 
 		AddChild(node);
 		return node;
@@ -106,7 +131,7 @@ public partial class Fsd3d : Node3D
 
 		}
 
-		if (angOffSetDeg >= 50)
+		if (angOffSetDeg >= 45)
 		{
 			saida.Reverse();
 		}
@@ -127,7 +152,7 @@ public partial class Fsd3d : Node3D
 	List<IntrucaoPath> Instrucoes = new();
 	public int UltIDIntruc = 0;
 
-	public void OnBtnAdicionarCurva(Vector2 PosCursor)
+	public void OnBtnAdicionarCurva(Vector2 PosCursor, float opX = 1, float opY = 1)
 	{
 		IntrucaoPath novaIntru = new();
 		novaIntru.Linear = false;
@@ -135,7 +160,7 @@ public partial class Fsd3d : Node3D
 		if (Instrucoes.Count == 0)
 		{
 			novaIntru.PInicial = PosCursor;
-			novaIntru.PFinal = novaIntru.PInicial + new Vector2(0.5f);
+			novaIntru.PFinal = new Vector2(opX, opY);
 
 			novaIntru.AngP = Meth.Rad4Deg(Meth.ObterDifAngRad(Vector2.Zero, novaIntru.PInicial));
 			novaIntru.AngP = 0;
@@ -143,26 +168,27 @@ public partial class Fsd3d : Node3D
 		}
 		else
 		{
-			novaIntru.guidAnt = Instrucoes.Last().guid;
-
 			novaIntru.PInicial = Instrucoes.Last().PFinal;
 			novaIntru.PFinal = PosCursor;
 
 			novaIntru.AngP = Meth.Rad4Deg(Meth.ObterDifAngRad(Instrucoes.Last().PInicial, Instrucoes.Last().PFinal));
-
 		}
 
 		novaIntru.IDPInicial = UltIDIntruc;
-		AdicionarPontoPathDesgin(novaIntru.PInicial, UltIDIntruc++, novaIntru.guid, true);
+		AdicionarPontoPathDesgin(novaIntru.PInicial, UltIDIntruc, novaIntru.guid, true);
+		UltIDIntruc++;
 
 		novaIntru.IDPFinal = UltIDIntruc;
-		PontoMoverSelecionado = AdicionarPontoPathDesgin(novaIntru.PFinal, UltIDIntruc++, novaIntru.guid, false);
+		PontoMoverSelecionado = AdicionarPontoPathDesgin(novaIntru.PFinal, UltIDIntruc, novaIntru.guid, false);
+		UltIDIntruc++;
 
 		Instrucoes.Add(novaIntru);
+		UpdateDesginerPontos();
 
 		AtivarMover = true;
 
 	}
+
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
@@ -176,11 +202,33 @@ public partial class Fsd3d : Node3D
 	PontoPathDesgin PontoMoverSelecionado;
 	bool AtivarMover = false;
 
+	List<Vector2> FiltrarPontos(List<Vector2> pontos)
+	{
+		List<Vector2> saida = new(){
+			 pontos[0]
+		};
+		Vector2 UltPonto = pontos[0];
+
+		for (int i = 0; i < pontos.Count; i++)
+		{
+			if (Meth.ObterDist(pontos[i], UltPonto) > 0.02)
+			{//adicionar pontos com dist maior de 2 cm
+				saida.Add(pontos[i]);
+				UltPonto = pontos[i];
+			}
+		}
+
+		return saida;
+	}
+
 	public List<Vector2> ObterPontosTotais()
 	{
 		List<Vector2> Pontos = new();
 		double ultAng = 0;
-		for (int i = 0; i < Instrucoes.Count; i++)
+		double ultAng2 = 0;
+		var PontoInicial = Instrucoes[0].PInicial;
+		Vector2 ultPonto = PontoInicial;
+		for (int i = 0; i < Instrucoes.Count; i++)//Hell
 		{
 			Vector2 ini = Instrucoes[i].PInicial;
 			Vector2 fim = Instrucoes[i].PFinal;
@@ -192,18 +240,75 @@ public partial class Fsd3d : Node3D
 			var angel = Meth.Rad4Deg(Math.Atan2(dy, dx));
 
 			//Instrucoes[i].AngP = double.Parse(File.ReadAllText("aa" + i));
-			Instrucoes[i].AngP = angel - ultAng;
-			ultAng = angel;
+			
+			ultAng += angel;
+			Instrucoes[i].AngP = angel;// angel - 
+			//ultAng2 += ultAng;
 
 			var cc = Instrucoes[i].AngP;//  90.0 -
-			cc = Math.Round(cc / 90.0);
-
+			cc = Math.Round(Math.Abs(cc % 90) / 90.0);//% 90.0
+			//cc = Math.Min(cc, 90);
+			GD.Print(cc);
 			Instrucoes[i].Pontos = ObterPontos(ini, fim, cc * 90);
+			//Instrucoes[i].AngP = double.Parse(File.ReadAllText("aa" + i));
+			//Instrucoes[i].Pontos = ObterPontos(ini, fim, Instrucoes[i].AngP);
+
 			Pontos.AddRange(Instrucoes[i].Pontos);
+			ultPonto = Instrucoes[i].PInicial;
 		}
-		return Pontos;
+		return FiltrarPontos(Pontos);
 	}
 
+
+	void UpdateDesginerPontos()
+	{
+		if (AtivarMover)
+		{
+			if (PontoMoverSelecionado.Inicial)
+			{
+				var curr = Instrucoes.Where(w => w.guid == PontoMoverSelecionado.GuidCaminho).ToList().FirstOrDefault();
+				if (curr != null)
+				{
+					curr.PInicial = OpVec.Vector3pVector2(PontoMoverSelecionado.Position);
+
+					var ant = LinqEx.GetPrevious(Instrucoes, curr);
+					if (ant != null)
+					{
+						var nodeAnt = ObterPontoPathDesgin(ant.IDPFinal);
+
+						if (nodeAnt != null)
+						{
+							nodeAnt.Position = PontoMoverSelecionado.Position;
+						}
+						ant.PFinal = OpVec.Vector3pVector2(PontoMoverSelecionado.Position);
+					}
+
+				}
+			}
+			else
+			{
+
+				var curr = Instrucoes.Where(w => w.guid == PontoMoverSelecionado.GuidCaminho).ToList().FirstOrDefault();
+				if (curr != null)
+				{
+					curr.PFinal = OpVec.Vector3pVector2(PontoMoverSelecionado.Position);
+
+					var prox = LinqEx.GetNext(Instrucoes, curr);
+					if (prox != null)
+					{
+						var nodeProx = ObterPontoPathDesgin(prox.IDPInicial);
+
+						if (nodeProx != null)
+						{
+							nodeProx.Position = PontoMoverSelecionado.Position;
+						}
+						prox.PInicial = OpVec.Vector3pVector2(PontoMoverSelecionado.Position);
+					}
+				}
+
+			}
+		}
+	}
 	public override void _Input(InputEvent @event)
 	{
 		if (@event is InputEventKey keyEvent && keyEvent.Pressed)
@@ -211,6 +316,7 @@ public partial class Fsd3d : Node3D
 			if (keyEvent.Keycode == Key.M)
 			{
 				var sw = Stopwatch.StartNew();
+				UpdateDesginerPontos();
 
 				ReDrawPontos(ObterPontosTotais());
 				GD.Print($"Tempo: {sw.ElapsedMilliseconds}");
@@ -229,41 +335,11 @@ public partial class Fsd3d : Node3D
 						PontoMoverSelecionado.GetChild(0).GetChild(0).GetChild<CollisionShape3D>(0).Disabled = true;
 						PontoMoverSelecionado.GetChild(1).GetChild(0).GetChild<CollisionShape3D>(0).Disabled = true;
 						AtivarMover = true;
-
 					}
-
-
-
-
 				}
 				else
 				{
-					if (PontoMoverSelecionado.Inicial)
-					{
-						Instrucoes.Where(w => w.guid == PontoMoverSelecionado.GuidCaminho).ToList().ForEach(s => s.PInicial = OpVec.Vector3pVector2(PontoMoverSelecionado.Position));
-						Instrucoes.Where(w => w.guid == PontoMoverSelecionado.GuidCaminho).Skip(1).ToList().ForEach(s =>
-							{
-								var node = ObterPontoPathDesgin(s.IDPFinal);
-								if (node != null)
-								{
-									node.Position = PontoMoverSelecionado.Position;
-								}
-								s.PFinal = OpVec.Vector3pVector2(PontoMoverSelecionado.Position);
-							});
-					}
-					else
-					{
-						Instrucoes.Where(w => w.guid == PontoMoverSelecionado.GuidCaminho).ToList().ForEach(s => s.PFinal = OpVec.Vector3pVector2(PontoMoverSelecionado.Position));
-						Instrucoes.Where(w => w.guid == PontoMoverSelecionado.GuidCaminho).Skip(-1).ToList().ForEach(s =>
-						{
-							var node = ObterPontoPathDesgin(s.IDPInicial);
-							if (node != null)
-							{
-								//	node.Position = PontoMoverSelecionado.Position;
-							}
-							//s.PInicial = OpVec.Vector3pVector2(PontoMoverSelecionado.Position);
-						});
-					}
+					UpdateDesginerPontos();
 
 					PontoMoverSelecionado.GetChild(0).GetChild(0).GetChild<CollisionShape3D>(0).Disabled = false;
 					PontoMoverSelecionado.GetChild(1).GetChild(0).GetChild<CollisionShape3D>(0).Disabled = false;
@@ -278,7 +354,7 @@ public partial class Fsd3d : Node3D
 
 class IntrucaoPath
 {
-	public Guid guidAnt;
+	public Guid guidAent;
 
 	public Guid guid;
 	public Vector2 PInicial { get; set; }
