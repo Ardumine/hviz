@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://bkkj10q3pbskq"]
 
 [ext_resource type="PackedScene" uid="uid://b0ypyg6yubc0c" path="res://Lidar/ScanCloud.tscn" id="1_t64ly"]
-[ext_resource type="Texture2D" uid="uid://c6nuc4nwb1h6r" path="res://mapa copy.png" id="2_4bk2o"]
+[ext_resource type="Texture2D" path="res://mapa copy.png" id="2_4bk2o"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wva2x"]
 albedo_color = Color(0.976471, 0.580392, 0, 1)

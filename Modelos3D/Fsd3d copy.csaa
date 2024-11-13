@@ -98,49 +98,42 @@ public partial class Fsd3d : Node3D
 	public List<Vector2> ObterPontos(Vector2 ini, Vector2 fim, double angOffSetDeg = 0)
 	{
 		List<Vector2> saida = new();
-		var pontoTrat = Meth.RotatePoint(fim - ini, angOffSetDeg);
-		// pontoTrat = fim - ini;
 
-		var dx = pontoTrat.X;
-		var dy = pontoTrat.Y;
+		var dx = fim.X - ini.X;
+		var dy = fim.Y - ini.Y;
 
-		var angel = Meth.Rad4Deg(Math.Atan2(dy, dx));
+		//var angel = Meth.Rad4Deg(Math.Atan2(dy, dx));
 
-		double angIni = 270;//Meth.NormAng(270 + angOffSetDeg);
-		double lim = 360;// Meth.NormAng  + (angOffSetDeg * 2)
+		double angIni = 270 + (angOffSetDeg * 2);//Meth.NormAng(270 + angOffSetDeg);
+		double lim = 360 + (angOffSetDeg * 2);// Meth.NormAng
 
-		GD.Print($"Ang: {angel}  angOffSetDeg {angOffSetDeg}  angIni {angIni}    lim {lim}");
+		//GD.Print($"Ang: {angel}  angOffSetDeg {angOffSetDeg}  angIni {angIni}    lim {lim}");
 
 
 		for (double i = angIni; i < lim; i += 1)
 		{
 			double ang = Meth.Deg4Rad(i);
-			float x = (float)Math.Cos(ang);//- 0.5f;
-			float y = 1f + (float)Math.Sin(ang);//+ 0.5F;//+ 1 - 0.5
+			float x = (float)Math.Cos(ang) + (float)Math.Sin(Meth.Deg4Rad(angOffSetDeg));//- 0.5f;
+			float y = (float)Math.Sin(ang) + (float)Math.Cos(Meth.Deg4Rad(angOffSetDeg));//+ 0.5F;//+ 1 - 0.5
 
 			x *= dx;
 			y *= dy;
 
-			//x += ini.X;
-			//y += ini.Y;
-			//x -= dx;
-			//y -= dy;
+			x += ini.X;
+			y += ini.Y;
 
-			saida.Add(Meth.RotatePoint(new Vector2(
-				x, y
-			), -angOffSetDeg) + ini);//angOffSetDeg * 2.
+			//saida.Add(Meth.RotatePoint(new Vector2(
+			//	x, y
+			//), 0));//angOffSetDeg * 2.
+			saida.Add(new Vector2(
+							x, y
+						));//angOffSetDeg * 2.
 
-			//saida.Add(new Vector2(
-			//				x, y
-			//			));//angOffSetDeg * 2.
-			//saida.Add(new Vector2(
-			//				x, y
-			//			));
 		}
 
 		if (angOffSetDeg >= 45)
 		{
-			//saida.Reverse();
+			saida.Reverse();
 		}
 		return saida;
 	}
@@ -159,7 +152,6 @@ public partial class Fsd3d : Node3D
 	List<IntrucaoPath> Instrucoes = new();
 	public int UltIDIntruc = 0;
 
-	double ul___ang = 0;
 	public void OnBtnAdicionarCurva(Vector2 PosCursor, float opX = 1, float opY = 1)
 	{
 		IntrucaoPath novaIntru = new();
@@ -231,25 +223,34 @@ public partial class Fsd3d : Node3D
 	public List<Vector2> ObterPontosTotais()
 	{
 		List<Vector2> Pontos = new();
-		Vector2 PosIniAnt = Instrucoes[0].PInicial;
-		double angAnt = 0;
+		double ultAng = 0;
+		var PontoInicial = Instrucoes[0].PInicial;
 		for (int i = 0; i < Instrucoes.Count; i++)//Hell
 		{
 			Vector2 ini = Instrucoes[i].PInicial;
 			Vector2 fim = Instrucoes[i].PFinal;
-			//var d = Meth.RotatePoint(PosIniAnt - ini, angAnt);
-			var d = PosIniAnt - ini;
-
-			Instrucoes[i].AngP = angAnt;//double.Parse(File.ReadAllText("aa" + i));
-
-			angAnt -= Meth.Rad4Deg(Math.Atan2(d.Y, d.X));
-			GD.Print(angAnt);
 
 
-			Instrucoes[i].Pontos = ObterPontos(ini, fim, Instrucoes[i].AngP);
+			var dx = fim.X - ini.X;
+			var dy = fim.Y - ini.Y;
+
+			var angel = Meth.Rad4Deg(Math.Atan2(dy, dx));
+
+			//Instrucoes[i].AngP = double.Parse(File.ReadAllText("aa" + i));
+
+			ultAng += angel;
+			Instrucoes[i].AngP = angel;// angel - 
+									   //ultAng2 += ultAng;
+
+			var cc = Instrucoes[i].AngP;//  90.0 -
+			cc = Math.Round(Math.Abs(cc % 90) / 90.0);//% 90.0
+													  //cc = Math.Min(cc, 90);
+			GD.Print(cc);
+			Instrucoes[i].Pontos = ObterPontos(ini, fim, cc * 90);
+			//Instrucoes[i].AngP = double.Parse(File.ReadAllText("aa" + i));
+			//Instrucoes[i].Pontos = ObterPontos(ini, fim, Instrucoes[i].AngP);
+
 			Pontos.AddRange(Instrucoes[i].Pontos);
-			PosIniAnt = Instrucoes[i].PInicial;
-
 		}
 		return FiltrarPontos(Pontos);
 	}
