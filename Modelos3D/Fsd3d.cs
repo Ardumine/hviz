@@ -244,7 +244,7 @@ public partial class Fsd3d : Node3D
 			Vector2 fim = Instrucoes[i].PFinal;
 			//var d = Meth.RotatePoint(PosIniAnt - ini, angAnt);
 
-			Instrucoes[i].AngP = double.Parse(File.ReadAllText("aa" + i)); //angAnt;//
+			Instrucoes[i].AngP = double.Parse(File.ReadAllText("testing/degs/aa" + i)); //angAnt;//
 			var angel = Meth.Rad4Deg(Meth.ObterDifAngRad(ini, fim));
 			angAnt += angel;
 			GD.Print(angAnt);
