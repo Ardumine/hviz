@@ -1,15 +1,13 @@
 using System;
-using System.Numerics;
 using System.Collections.Generic;
 using System.Threading;
-using Godot;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Ardumine.SistemaFSD.Condutor;
 class CondutorCaminhoAuto
 {
     bool Emerg = false;
-    int IdxCurr = 0;
+    public int IdxCurr = 0;
     SistemaLidar sisLidar;
     SistemaMotores sisMotores;
     Action<string> Log;
@@ -38,6 +36,7 @@ class CondutorCaminhoAuto
     //Seguir pontos
     public void SeguirPontos(List<Vector2> PontosParaIr, CancellationToken token = default(CancellationToken))
     {
+        Emerg = false;
         //Fase 1 virar para o primeiro ponto
         for (IdxCurr = 0; IdxCurr < PontosParaIr.Count; IdxCurr++)
         {
@@ -91,7 +90,7 @@ class CondutorCaminhoAuto
                 RodarParaGrau(targetPoint, true, 30, 0.2, token);
             }
             if (token.IsCancellationRequested || Emerg) return;
-            NavegarParaPonto(targetPoint, true, 0.2, 0.9, token);
+            NavegarParaPonto(targetPoint, true, 0.2, 1.3, token);
 
         }
         else
@@ -118,7 +117,7 @@ class CondutorCaminhoAuto
             //Take a look to this later.
             angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, targetPoint);
 
-            int steer = Meth.SpeedControl((int)(angleDifference / 180.0 * 1200.0), 140);
+            int steer = Meth.SpeedControl((int)(angleDifference / 180.0 * 1200.0), 130);
             Log($"RodParaProxPonto DifAng: {angleDifference:F2} LidAngCurr: {sisLidar.AngCurr:F2} MotSteer: {steer:F2}");
             sisMotores.MandarSteer(steer, 0);
             if (token.IsCancellationRequested || Emerg) return;
@@ -149,17 +148,19 @@ class CondutorCaminhoAuto
             DistPFim = Meth.ObterDist(sisLidar.PosCurr, posObj);
             double angleDifference = Meth.ObterDifAng(sisLidar.PosCurr, sisLidar.AngCurr, posObj);
 
+            double difPosNorm = DistPFim / DistPFim_Inicial;
+            double difAngNorm = angleDifference / 180.0f;
 
-            int velRaw = (int)(DistPFim / DistPFim_Inicial * 400.0 * multVel);
-            int vel = Meth.SpeedControl(velRaw, 85);
+            int velRaw = (int)(difPosNorm * 400.0 * multVel);
+            int vel = Math.Min((int)(Meth.SpeedControl(velRaw, 75) * (1.0 - Math.Abs(difAngNorm / 1))), 65);
 
-            int steer = Meth.SpeedControl((int)(angleDifference / 180.0f * 400.0f * (2.0f - (DistPFim / DistPFim_Inicial))), 60);
+            int steer = Meth.SpeedControl((int)(difAngNorm * 400.0f ), 60);//* (2.0f - (DistPFim / DistPFim_Inicial))
 
             sisMotores.MandarSteer(steer, vel);
 
 
             Log($"DistPFim: {DistPFim:F4} VelMot: {vel} SteerMot: {steer}");
-            Thread.Sleep(40);
+            Thread.Sleep(30);
             if (token.IsCancellationRequested || Emerg) return;
         }
 
