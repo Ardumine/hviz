@@ -98,13 +98,16 @@ public partial class Fsd3d : Node3D
 	public List<Vector2> ObterPontos(Vector2 ini, Vector2 fim, double angOffSetDeg = 0)
 	{
 		List<Vector2> saida = new();
+
+		var dd = fim - ini;
+		var angel = Meth.Rad4Deg(Math.Atan2(dd.Y, dd.X));
+
 		var pontoTrat = Meth.RotatePoint(fim - ini, angOffSetDeg);
 		// pontoTrat = fim - ini;
 
 		var dx = pontoTrat.X;
 		var dy = pontoTrat.Y;
 
-		var angel = Meth.Rad4Deg(Math.Atan2(dy, dx));
 
 		double angIni = 270;//Meth.NormAng(270 + angOffSetDeg);
 		double lim = 360;// Meth.NormAng  + (angOffSetDeg * 2)
@@ -235,15 +238,19 @@ public partial class Fsd3d : Node3D
 		double angAnt = 0;
 		for (int i = 0; i < Instrucoes.Count; i++)//Hell
 		{
+			GD.Print("");
+
 			Vector2 ini = Instrucoes[i].PInicial;
 			Vector2 fim = Instrucoes[i].PFinal;
 			//var d = Meth.RotatePoint(PosIniAnt - ini, angAnt);
-			var d = PosIniAnt - ini;
 
-			Instrucoes[i].AngP = angAnt;//double.Parse(File.ReadAllText("aa" + i));
-
-			angAnt -= Meth.Rad4Deg(Math.Atan2(d.Y, d.X));
+			Instrucoes[i].AngP = double.Parse(File.ReadAllText("aa" + i)); //angAnt;//
+			var angel = Meth.Rad4Deg(Meth.ObterDifAngRad(ini, fim));
+			angAnt += angel;
 			GD.Print(angAnt);
+			//Instrucoes[i].AngP = angAnt / 2;
+
+			//GD.Print(angAnt);
 
 
 			Instrucoes[i].Pontos = ObterPontos(ini, fim, Instrucoes[i].AngP);

@@ -94,7 +94,7 @@ public partial class Lidar : Node3D
 		//pos_obj.Visible = false;
 
 		sisLidar = new SistemaLidar(TamMapa);
-		//sisLidar.Iniciar(IP);
+		sisLidar.Iniciar(IP);
 		sisLidar.OnDadosRecebidos += (dados) =>
 		{
 			Log("Dados Lidar REC!" + dados.Count);
@@ -103,8 +103,8 @@ public partial class Lidar : Node3D
 		};
 
 		sisMapa = new SistemaMapa();
-		//sisMapa.Iniciar(IP, TamMapa);
-		sisMapa.LoadMapaBMP("testing/testingMap.bmp");
+		sisMapa.Iniciar(IP, TamMapa);
+		//sisMapa.LoadMapaBMP("testing/testingMap.bmp");
 
 		sisMapa.OnDadosRecebidos += (dados) =>
 		{
@@ -112,7 +112,7 @@ public partial class Lidar : Node3D
 		};
 
 		sisMotores = new SistemaMotores();
-		//sisMotores.IniMotores();
+		sisMotores.IniMotores();
 
 		sisFSD = new();
 		condutorAuto = new();

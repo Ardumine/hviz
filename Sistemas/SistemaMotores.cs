@@ -60,7 +60,8 @@ class SistemaMotores
 	}
 
 #endif
-
+public void IniMotores()
+	{}
 	int ultSteer = -100000;
 	int ultSpeed = -100000;
 
