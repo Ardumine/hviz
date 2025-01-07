@@ -16,7 +16,7 @@ namespace AStar
         private readonly WorldGrid _world;
         private readonly ICalculateHeuristic _heuristic;
 
-        public PathFinder(WorldGrid worldGrid, PathFinderOptions pathFinderOptions = null)
+        public PathFinder(WorldGrid worldGrid, PathFinderOptions pathFinderOptions = null!)
         {
             _world = worldGrid ?? throw new ArgumentNullException(nameof(worldGrid));
             _options = pathFinderOptions ?? new PathFinderOptions();

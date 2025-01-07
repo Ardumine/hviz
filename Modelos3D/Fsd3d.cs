@@ -9,10 +9,10 @@ using Vector2 = System.Numerics.Vector2;
 namespace Ardumine.SistemaFSD.GUI;
 public partial class Fsd3d : Node3D
 {
-	PackedScene RecursoPontoPathDesgin;
-	BaseMaterial3D shaderCorPontoIncial;
-	BaseMaterial3D shaderCorPontoFinal;
-	Path3D PathSpline;
+	PackedScene? RecursoPontoPathDesgin;
+	BaseMaterial3D? shaderCorPontoIncial;
+	BaseMaterial3D? shaderCorPontoFinal;
+	Path3D? PathSpline;
 
 
 	// Called when the node enters the scene tree for the first time.
@@ -48,7 +48,7 @@ public partial class Fsd3d : Node3D
 
 	PontoPathDesgin AdicionarPontoPathDesgin(Vector2 pos, int id, Guid GuidCaminho, bool Inicial)
 	{
-		var node = RecursoPontoPathDesgin.Instantiate<PontoPathDesgin>();
+		var node = RecursoPontoPathDesgin!.Instantiate<PontoPathDesgin>();
 
 		node.ID = id;
 		node.Position = OpVec.Vector2pVector3(pos);
@@ -92,7 +92,7 @@ public partial class Fsd3d : Node3D
 		}
 
 
-		return null;
+		return null!;
 	}
 
 	public List<Vector2> ObterPontos(Vector2 ini, Vector2 fim, double angOffSetDeg = 0)
@@ -151,7 +151,7 @@ public partial class Fsd3d : Node3D
 
 	void ReDrawPontos(List<Vector2> Pontos)
 	{
-		PathSpline.Curve.ClearPoints();
+		PathSpline!.Curve.ClearPoints();
 		for (int i = 0; i < Pontos.Count; i++)
 		{
 			PathSpline.Curve.AddPoint(OpVec.Vector2pVector3(Pontos[i], i / 2500.0f));
@@ -205,11 +205,11 @@ public partial class Fsd3d : Node3D
 	{
 		if (AtivarMover)
 		{
-			PontoMoverSelecionado.Position = OpVec.Vector2pVector3(Camera.PosCursor);
+			PontoMoverSelecionado!.Position = OpVec.Vector2pVector3(Camera.PosCursor);
 		}
 	}
 
-	PontoPathDesgin PontoMoverSelecionado;
+	PontoPathDesgin? PontoMoverSelecionado;
 	bool AtivarMover = false;
 
 	List<Vector2> FiltrarPontos(List<Vector2> pontos)
@@ -254,7 +254,7 @@ public partial class Fsd3d : Node3D
 
 
 			Instrucoes[i].Pontos = ObterPontos(ini, fim, Instrucoes[i].AngP);
-			Pontos.AddRange(Instrucoes[i].Pontos);
+			Pontos.AddRange(Instrucoes[i].Pontos!);
 			PosIniAnt = Instrucoes[i].PInicial;
 
 		}
@@ -266,7 +266,7 @@ public partial class Fsd3d : Node3D
 	{
 		if (AtivarMover)
 		{
-			if (PontoMoverSelecionado.Inicial)
+			if (PontoMoverSelecionado!.Inicial)
 			{
 				var curr = Instrucoes.Where(w => w.guid == PontoMoverSelecionado.GuidCaminho).ToList().FirstOrDefault();
 				if (curr != null)
@@ -343,7 +343,7 @@ public partial class Fsd3d : Node3D
 				{
 					UpdateDesginerPontos();
 
-					PontoMoverSelecionado.GetChild(0).GetChild(0).GetChild<CollisionShape3D>(0).Disabled = false;
+					PontoMoverSelecionado!.GetChild(0).GetChild(0).GetChild<CollisionShape3D>(0).Disabled = false;
 					PontoMoverSelecionado.GetChild(1).GetChild(0).GetChild<CollisionShape3D>(0).Disabled = false;
 
 					AtivarMover = false;
@@ -364,6 +364,6 @@ class IntrucaoPath
 	public int IDPInicial { get; set; }
 	public int IDPFinal { get; set; }
 
-	public List<Vector2> Pontos { get; set; }
+	public List<Vector2>? Pontos { get; set; }
 	public double AngP { get; set; }
 }

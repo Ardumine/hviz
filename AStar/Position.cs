@@ -42,7 +42,7 @@ namespace AStar
             return !a.Equals(b);
         }
 
-        public override bool Equals(Object other)
+        public override bool Equals(object? other)
         {
             if (other is Position otherPoint)
             {

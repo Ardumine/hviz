@@ -8,7 +8,7 @@ using Vector2 = System.Numerics.Vector2;
 namespace Ardumine.SistemaFSD.Condutor;
 class CondutorCaminhoManual
 {
-    List<Vector2> Caminho { get; set; }
+    List<Vector2>? Caminho { get; set; }
     bool Emerg = false;
     int IdxCurr = 0;
 
@@ -34,7 +34,7 @@ class CondutorCaminhoManual
     //Para fazer conducao. Sem thread.
     public void Conduzir()
     {
-        Vector2[] cam = new Vector2[Caminho.Count];
+        Vector2[] cam = new Vector2[Caminho!.Count];
         Caminho.CopyTo(cam);
         for (IdxCurr = 0; IdxCurr < cam.Length; IdxCurr++)
         {

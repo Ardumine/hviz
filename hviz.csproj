@@ -1,18 +1,23 @@
 <Project Sdk="Godot.NET.Sdk/4.3.0">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net8.0</TargetFramework>
     <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'ios' ">net8.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Emgu.CV" Version="4.9.0.5494" />
     <PackageReference Include="Emgu.CV.runtime.windows" Version="4.9.0.5494" />
-
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Websocket.Client" Version="5.1.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AFCP\AFCP.csproj" />
+    <ProjectReference Include="..\Kernel.Logging\Kernel.Logging.csproj" />
+    <ProjectReference Include="..\Kernel.Modules.Base\Kernel.Modules.Base.csproj" />
+    <ProjectReference Include="..\Modules.YDLidar\Modules.YDLidar.csproj" />
+
+  </ItemGroup>
 
   <ItemGroup>
     <Content Remove="teste\**" />
@@ -34,13 +39,6 @@
     <Compile Remove="tralha\**" />
     <EmbeddedResource Remove="tralha\**" />
     <None Remove="tralha\**" />
-
-    <Content Remove="build\**" />
-    <Compile Remove="build\**" />
-    <EmbeddedResource Remove="build\**" />
-    <None Remove="build\**" />
-
-    
   </ItemGroup>
 
 

@@ -4,7 +4,7 @@ using Godot;
 
 public partial class Camera : Camera3D
 {
-    public Node3D Pivot { get; set; }
+    public Node3D? Pivot { get; set; }
     Vector3 Velocity = Vector3.Zero;
     public float ACCELERATION = 0.6f;
     public float MOUSE_SENSITIVITY = 0.03f;
@@ -77,7 +77,7 @@ public partial class Camera : Camera3D
 
 
             dir = dir.Normalized();
-            dir = dir.Rotated(Vector3.Up, Pivot.Rotation.Y);
+            dir = dir.Rotated(Vector3.Up, Pivot!.Rotation.Y);
 
             Velocity = Meth.Lerp(Vector3.Zero, dir * TargetSpeed, ACCELERATION + Pivot.Position.Y / 10);
             Pivot.Position += Velocity;
@@ -103,7 +103,7 @@ public partial class Camera : Camera3D
 
 
     public delegate void OnClick3DHandler(Vector3 pos);
-    public static event OnClick3DHandler OnClick3D;
+    public static event OnClick3DHandler? OnClick3D;
 
     public override void _Input(InputEvent @event)
     {
@@ -124,7 +124,7 @@ public partial class Camera : Camera3D
                 var YJoyStick = mouseMotionEvent.Relative.Y / 10;
 
 
-                Pivot.RotateY(-XJoyStick * MOUSE_SENSITIVITY);
+                Pivot!.RotateY(-XJoyStick * MOUSE_SENSITIVITY);
 
                 if (!Modo2D)
                 {

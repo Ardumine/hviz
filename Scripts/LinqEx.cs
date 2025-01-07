@@ -7,11 +7,11 @@ public class LinqEx
     {
         try
         {
-            return list.SkipWhile(x => !x.Equals(current)).Skip(1).First();
+            return list.SkipWhile(x => x!.Equals(current)).Skip(1).First();
         }
         catch
         {
-            return default(T);
+            return default(T)!;
         }
     }
 
@@ -19,11 +19,11 @@ public class LinqEx
     {
         try
         {
-            return list.TakeWhile(x => !x.Equals(current)).Last();
+            return list.TakeWhile(x => x!.Equals(current)).Last();
         }
         catch
         {
-            return default(T);
+            return default(T)!;
         }
     }
 }

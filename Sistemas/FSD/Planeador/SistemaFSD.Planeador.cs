@@ -267,16 +267,16 @@ class ResultadoPrepFSD
 	/// <summary>
 	/// Imagem tranformada do distance transform
 	/// </summary>
-	public byte[] ImgTransformada { get; set; }
+	public byte[]? ImgTransformada { get; set; }
 
 	/// <summary>
 	/// A lista de pontos da saida antes de ser tratada para que seja linear
 	/// </summary>
-	public List<Vector2> PontosCaminhoRaw { get; set; }
+	public List<Vector2>? PontosCaminhoRaw { get; set; }
 
 	/// <summary>
 	/// Deve-se usar quando é FSD. è o resultado do tratamento de PontosCaminhoRaw
 	/// </summary>
-	public List<Vector2> PontosCaminho { get; set; }
+	public List<Vector2>? PontosCaminho { get; set; }
 
 }

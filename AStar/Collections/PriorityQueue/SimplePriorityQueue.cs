@@ -7,14 +7,14 @@ namespace AStar.Collections.PriorityQueue
         private readonly List<T> _innerList = new List<T>();
         private readonly IComparer<T> _comparer;
 
-        public SimplePriorityQueue(IComparer<T> comparer = null)
+        public SimplePriorityQueue(IComparer<T> comparer = null!)
         {
             _comparer = comparer ?? Comparer<T>.Default;;
         }
 
         public T Peek()
         {
-            return _innerList.Count > 0 ? _innerList[0] : default(T);
+            return _innerList.Count > 0 ? _innerList[0] : default(T)!;
         }
 
         public void Clear()
