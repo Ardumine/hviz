@@ -2,7 +2,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Godot;
+using AFCP;
 //using System.IO.Ports;
 //<PackageReference Include="System.IO.Ports" Version="8.0.0" />
 
@@ -60,16 +60,22 @@ class SistemaMotores
 	}
 
 #endif
-public void IniMotores()
-	{}
+	DataChannelInterface<string> MotorChannel { get; set; }
+
+	public SistemaMotores(ChannelManager _channelManager)
+	{
+		//MotorChannel = _channelManager.GetInterfaceForChannel<string>("/motors");
+
+	}
+
 	int ultSteer = -100000;
 	int ultSpeed = -100000;
 
 	public void MandarSteer(int steer, int vel)
 	{
-		if ((ultSpeed != vel || ultSteer != steer) || vel == 0)
+		if (ultSpeed != vel || ultSteer != steer || vel == 0 || steer == 0)
 		{
-			SistemaLidar.MandarDadosStrWs($"{steer}, {vel}|");
+			//MotorChannel.Set($"{steer}, {vel}|");
 			ultSteer = steer;
 			ultSpeed = vel;
 		}
@@ -78,7 +84,7 @@ public void IniMotores()
 
 	}
 
-	
+
 
 
 

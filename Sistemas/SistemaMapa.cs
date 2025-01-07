@@ -1,6 +1,7 @@
 using System;
 using System.Net.Sockets;
 using System.Threading;
+using AFCP;
 using Emgu.CV;
 using Godot;
 
@@ -9,7 +10,7 @@ class SistemaMapa
 
 
 	public delegate void OnDadosRecebidosEvent(byte[] dados);
-	public event OnDadosRecebidosEvent OnDadosRecebidos;
+	public event OnDadosRecebidosEvent? OnDadosRecebidos;
 
 
 
@@ -32,43 +33,15 @@ class SistemaMapa
 		}).Start();
 
 	}
-	public void Iniciar(string IP, int tamMapa)
+	public void Iniciar(ChannelManager _channelManager, int tamMapa)
 	{
 		TamMapa = tamMapa;
-		new Thread(() =>
+		var map = _channelManager.GetInterfaceForChannel<byte[]>("/SLAMmap");
+		map.AddEvent((s) =>
 		{
-			while (true)
-			{
-				try
-				{
-					TcpClient client = new TcpClient(IP, 8090);
-					NetworkStream stream = client.GetStream();
-					while (client.Connected)
-					{
-						//int bytesRead = stream.Read(Dados_mapa, 0, Dados_mapa.Length); // read the data from the server
+			Dados_mapa = s!;
+			OnDadosRecebidos?.Invoke(s!);
+		});
 
-						int messageSize = Dados_mapa.Length;
-						int readSoFar = 0;
-						byte[] dados = new byte[messageSize];
-
-						while (readSoFar < messageSize)
-						{
-							var read = stream.Read(dados, readSoFar, dados.Length - readSoFar);
-							readSoFar += read;
-							if (read == 0)
-								break;   // connection was broken
-										 //Log(read);
-						}
-						Dados_mapa = dados;
-						OnDadosRecebidos?.Invoke(dados);
-
-					}
-				}
-				catch (Exception e)
-				{
-					GD.PrintErr("erro TCP!" + e.Message);
-				}
-			}
-		}).Start();
 	}
 }

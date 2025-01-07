@@ -2,9 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Newtonsoft.Json;
-using Websocket.Client;
-using BaseSLAM;
+using Ardumine.Modules.YDLidar;
 public partial class ScanCloud : Node3D
 {
 
@@ -22,9 +20,9 @@ public partial class ScanCloud : Node3D
 	{
 	}
 
-	List<Ray> raios = new();
+	LidarPoint[]? raios;
 	bool exec_update = false;
-	public void UpdatePontos(List<Ray> _raios)
+	public void UpdatePontos(LidarPoint[] _raios)
 	{
 		raios = _raios;
 		exec_update = true;
@@ -40,20 +38,20 @@ public partial class ScanCloud : Node3D
 			exec_update = false;
 			
 			//Esconder se não forem precisos
-			for (int i = raios.Count; i < Points.Count; i++)
+			for (int i = raios!.Length; i < Points.Count; i++)
 			{
 				Points[i].Visible = false;
 			}
-			for (int i = raios.Count - 1; i < Cylinders.Count; i++)
+			for (int i = raios.Length - 1; i < Cylinders.Count; i++)
 			{
 				Cylinders[i].Visible = false;
 			}
 
 			//Criar se não existir
-			if (Points.Count < raios.Count)
+			if (Points.Count < raios.Length)
 			{
 				// If there are not enough points, create new ones
-				int additionalPointsNeeded = raios.Count - Points.Count;
+				int additionalPointsNeeded = raios.Length - Points.Count;
 				for (int i = 0; i < additionalPointsNeeded; i++)
 				{
 					var point = new CsgSphere3D
@@ -65,10 +63,10 @@ public partial class ScanCloud : Node3D
 					Points.Add(point);	
 				}
 			}
-			if (Cylinders.Count < raios.Count - 1)
+			if (Cylinders.Count < raios.Length - 1)
 			{
 				// If there are not enough cylinders, create new ones
-				int additionalCylindersNeeded = raios.Count - 1 - Cylinders.Count;
+				int additionalCylindersNeeded = raios.Length - 1 - Cylinders.Count;
 				for (int i = 0; i < additionalCylindersNeeded; i++)
 				{
 					var cylinder = new CsgCylinder3D
@@ -82,16 +80,16 @@ public partial class ScanCloud : Node3D
 			}
 
 			// Update the position of each point
-			for (int i = 0; i < raios.Count; i++)
+			for (int i = 0; i < raios.Length; i++)
 			{
-				float r = raios[i].Radius;
+				float r = raios[i].Distance;
 				var angle = raios[i].Angle;
 				double px = r * Math.Cos(angle);
 				double py = r * Math.Sin(angle);
 
 				Points[i].Position = new Vector3((float)px, 0, (float)py);
 			}
-			for (int i = 0; i < raios.Count - 1; i++)
+			for (int i = 0; i < raios.Length - 1; i++)
 			{
 				var point1 = Points[i].Position;
 				var point2 = Points[i + 1].Position;
