@@ -1,7 +1,7 @@
 using System.Drawing;
 using System.Numerics;
 using System.Threading;
-using AFCP;
+using Kernel.AFCP;
 using Ardumine.Modules.YDLidar;
 
 public class SistemaLidar
@@ -39,14 +39,14 @@ public class SistemaLidar
 			PosCurr = PosSLAMParaJogo(pos.X, pos.Y);
 			AngCurr = pos.Z;
 		});
-/*
+
 		lidarDataChannel.AddEvent((dados) =>
 		{
 			for (int i = 0; i < dados!.Length; i++)
 			{
 				dados[i] = new()
 				{
-					AngleRad = dados[i].AngleRad,
+					Angle = dados[i].Angle,
 					Distance = dados[i].Distance / 100.0f
 
 				};
@@ -57,7 +57,7 @@ public class SistemaLidar
 			}).Start();
 
 		});
-*/
+
 
 	}
 
