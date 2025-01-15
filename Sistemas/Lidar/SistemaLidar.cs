@@ -39,7 +39,6 @@ public class SistemaLidar
 			PosCurr = PosSLAMParaJogo(pos.X, pos.Y);
 			AngCurr = pos.Z;
 		});
-
 		lidarDataChannel.AddEvent((dados) =>
 		{
 			for (int i = 0; i < dados!.Length; i++)
