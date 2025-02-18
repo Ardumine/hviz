@@ -64,8 +64,7 @@ class SistemaMotores
 
 	public SistemaMotores(ChannelManager _channelManager)
 	{
-		//MotorChannel = _channelManager.GetInterfaceForChannel<string>("/motors");
-
+		MotorChannel = _channelManager.GetInterfaceForChannel<string>("/motors");
 	}
 
 	int ultSteer = -100000;
