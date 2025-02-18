@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AFCP\AFCP.csproj" />
+    <ProjectReference Include="..\Kernel.AFCP\Kernel.AFCP.csproj" />
     <ProjectReference Include="..\Kernel.Logging\Kernel.Logging.csproj" />
     <ProjectReference Include="..\Kernel.Modules.Base\Kernel.Modules.Base.csproj" />
     <ProjectReference Include="..\Modules.YDLidar\Modules.YDLidar.csproj" />

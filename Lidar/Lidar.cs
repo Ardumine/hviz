@@ -1,4 +1,4 @@
-using AFCP;
+using Kernel.AFCP;
 using Ardumine.Modules.YDLidar;
 using Ardumine.SistemaFSD.GUI;
 using Godot;
@@ -38,7 +38,6 @@ public partial class Lidar : Node3D
 	Ardumine.SistemaFSD.PlaneadorAuto? sisFSD;
 	Ardumine.SistemaFSD.Condutor.CondutorCaminhoAuto? condutorAuto;
 
-	LidarPoint[]? dadosLidar;
 
 
 	List<CsgBox3D> boxParaPoses = new();
@@ -111,7 +110,7 @@ public partial class Lidar : Node3D
 		{
 			Log("Dados Lidar REC!" + dados.Length);
 			scanCloud!.UpdatePontos(dados);
-			dadosLidar = dados;
+			//dadosLidar = dados;
 		};
 
 		sisMapa = new SistemaMapa();

@@ -2,7 +2,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using AFCP;
+using Kernel.AFCP;
 //using System.IO.Ports;
 //<PackageReference Include="System.IO.Ports" Version="8.0.0" />
 
@@ -64,8 +64,7 @@ class SistemaMotores
 
 	public SistemaMotores(ChannelManager _channelManager)
 	{
-		//MotorChannel = _channelManager.GetInterfaceForChannel<string>("/motors");
-
+		MotorChannel = _channelManager.GetInterfaceForChannel<string>("/motors");
 	}
 
 	int ultSteer = -100000;
